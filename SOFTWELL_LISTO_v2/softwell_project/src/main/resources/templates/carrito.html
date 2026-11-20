@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon-32.ico}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carrito de Compras - SOFTWELL</title>
+  <link rel="stylesheet" th:href="@{/styles.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="cart-page">
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="logo">LJE</div>
+      <nav class="main-nav">
+        <a th:href="@{/}">Inicio</a>
+        <a th:href="@{/catalogo}" class="nav-link">Catálogo</a>
+        <a th:href="@{/carrito}" class="active cart-link">
+          <i class="fas fa-shopping-cart"></i>
+          <span class="cart-badge" th:if="${cartItemCount > 0}" th:text="${cartItemCount}">0</span>
+        </a>
+        <a th:href="@{/login}" class="btn btn-primary">Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container cart-page-main">
+    <h1 class="cart-page-title">Carrito de Compras</h1>
+
+    <div th:if="${success}" class="alert alert-success">
+      <i class="fas fa-check-circle"></i>
+      <span th:text="${success}"></span>
+    </div>
+
+    <div th:if="${items.isEmpty()}" class="empty-cart">
+      <i class="fas fa-shopping-cart"></i>
+      <h2>Tu carrito está vacío</h2>
+      <p>¡Descubre nuestras joyas exclusivas!</p>
+      <a th:href="@{/catalogo}" class="btn btn-primary">Ir al Catálogo</a>
+    </div>
+
+    <div th:if="${!items.isEmpty()}" class="cart-container">
+      <div class="cart-items">
+        <div class="cart-item" th:each="item : ${items}">
+          <div class="cart-item-image">
+            <img th:src="${item.product.imagen}" th:alt="${item.product.nombre}">
+          </div>
+          
+          <div class="cart-item-details">
+            <h3 th:text="${item.product.nombre}">Nombre</h3>
+            <p class="cart-item-category" th:text="${item.product.categoria}">Categoría</p>
+            <p class="cart-item-price" th:text="'COP $ ' + ${#numbers.formatDecimal(item.product.precio, 1, 'POINT', 0, 'COMMA')}">COP $ 0</p>
+          </div>
+
+          <div class="cart-item-quantity">
+            <form th:action="@{/carrito/actualizar/{id}(id=${item.product.id})}" method="post" class="cart-quantity-form">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+              <input class="cart-quantity-input" type="number" name="cantidad" th:value="${item.cantidad}" min="1" th:max="${item.product.stock}">
+              <button type="submit" class="btn-small cart-update-button">Ok</button>
+            </form>
+          </div>
+
+          <div class="cart-item-subtotal">
+            <p>Subtotal:</p>
+            <p class="subtotal-price" th:text="'COP $ ' + ${#numbers.formatDecimal(item.subtotal, 1, 'POINT', 0, 'COMMA')}">COP $ 0</p>
+          </div>
+
+          <div class="cart-item-remove">
+            <form th:action="@{/carrito/eliminar/{id}(id=${item.product.id})}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+              <button type="submit" class="btn-remove" title="Eliminar">
+                <i class="fas fa-trash"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="cart-summary">
+        <h2>Resumen del Pedido</h2>
+        
+        <div class="summary-row">
+          <span>Subtotal:</span>
+          <span th:text="'COP $ ' + ${#numbers.formatDecimal(total, 1, 'POINT', 0, 'COMMA')}">COP $ 0</span>
+        </div>
+
+        <div class="summary-row">
+          <span>IVA (19%):</span>
+          <span th:text="'COP $ ' + ${#numbers.formatDecimal(iva, 1, 'POINT', 0, 'COMMA')}">COP $ 0</span>
+        </div>
+        
+        <div class="summary-row">
+          <span>Envío:</span>
+          <span th:text="'COP $ ' + ${#numbers.formatDecimal(envio, 1, 'POINT', 0, 'COMMA')}">COP $ 15.000</span>
+        </div>
+        
+        <div class="summary-divider"></div>
+        
+        <div class="summary-row summary-total">
+          <span>Total:</span>
+          <span th:text="'COP $ ' + ${#numbers.formatDecimal(totalFinal, 1, 'POINT', 0, 'COMMA')}">COP $ 0</span>
+        </div>
+
+        <a th:href="@{/carrito/checkout}" class="btn btn-primary btn-block">
+          Proceder al Pago <i class="fas fa-arrow-right"></i>
+        </a>
+
+        <a th:href="@{/catalogo}" class="btn btn-ghost btn-block">
+          Seguir Comprando
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>SOFTWELL</h4>
+        <p>&copy; 2025 Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <style>
+    .cart-page {
+      --cart-aqua: #00A6A6;
+      --cart-aqua-light: #D9F5F3;
+      --cart-white: #FFFFFF;
+      --cart-black: #111111;
+      --cart-muted: #6B7280;
+      background: var(--cart-white);
+      color: var(--cart-black);
+    }
+
+    .cart-page .site-header {
+      background: #121212;
+      border-bottom: 1px solid rgba(0, 166, 166, .4);
+    }
+
+    .cart-page .logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 48px;
+      padding: 0;
+      border: 1px solid var(--cart-aqua);
+      border-radius: 10px;
+      background: var(--cart-aqua);
+      color: var(--cart-white);
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: .08em;
+    }
+
+    .cart-page .logo::before {
+      content: none;
+    }
+
+    .cart-page .main-nav { gap: 8px; }
+    .cart-page .main-nav > a:not(.btn) {
+      border-radius: 50px;
+      color: var(--cart-white)
+    }
+    .cart-page .main-nav > a:not(.btn):hover,
+    .cart-page .main-nav > a.active:not(.btn) {
+      border-color: var(--cart-aqua);
+      background: var(--cart-aqua);
+      color: var(--cart-white);
+    }
+    .cart-page .main-nav > a.cart-link {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--cart-aqua-light);
+      border-radius: 50%;
+      color: var(--cart-aqua);
+    }
+    .cart-page .main-nav > a.cart-link:hover,
+    .cart-page .main-nav > a.cart-link.active {
+      border-color: var(--cart-aqua);
+      background: var(--cart-aqua);
+      color: var(--cart-white);
+    }
+    .cart-page .cart-badge { background: var(--cart-aqua); }
+    .cart-page .btn-primary,
+    .cart-page .btn-ghost,
+    .cart-page .btn-small {
+      border: 0;
+      border-radius: 50px;
+      background: var(--cart-aqua);
+      color: var(--cart-white);
+      transition: background-color .2s ease, transform .2s ease, box-shadow .2s ease;
+    }
+    .cart-page .btn-primary:hover,
+    .cart-page .btn-small:hover {
+      background: #008c8c;
+      color: var(--cart-white);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(0, 166, 166, .2);
+    }
+    .cart-page .btn-ghost {
+      background: var(--cart-white);
+      border: 1px solid var(--cart-aqua);
+      color: var(--cart-aqua);
+    }
+    .cart-page .btn-ghost:hover {
+      background: var(--cart-aqua-light);
+      color: var(--cart-black);
+    }
+    .cart-page .btn::after { content: none; }
+
+    .cart-page-main {
+      box-sizing: border-box;
+      padding: 48px 20px 64px;
+    }
+
+    .cart-page-title {
+      display: table;
+      max-width: 100%;
+      margin: 0 auto 28px;
+      padding: 12px 22px;
+      border: 1px solid var(--cart-aqua);
+      border-radius: 16px;
+      background: var(--cart-aqua);
+      color: var(--cart-white);
+      font-family: 'Playfair Display', Georgia, serif;
+      text-align: center;
+    }
+
+    .cart-page .cart-item,
+    .cart-page .cart-summary,
+    .cart-page .empty-cart {
+      border: 1px solid var(--cart-aqua-light);
+      border-radius: 16px;
+      background: var(--cart-white);
+      box-shadow: 0 10px 28px rgba(17, 17, 17, .06);
+    }
+    .cart-page .cart-item-image { border-radius: 12px; }
+    .cart-page .cart-item-details h3,
+    .cart-page .cart-summary h2,
+    .cart-page .empty-cart h2 { color: var(--cart-black); }
+    .cart-page .cart-item-category,
+    .cart-page .cart-item-subtotal > p:first-child,
+    .cart-page .empty-cart p { color: var(--cart-muted); }
+    .cart-page .cart-item-price,
+    .cart-page .subtotal-price,
+    .cart-page .summary-total,
+    .cart-page .empty-cart > i { color: var(--cart-aqua); }
+    .cart-page .cart-summary { border-top: 3px solid var(--cart-aqua); }
+    .cart-page .summary-divider { border-color: var(--cart-aqua-light); }
+    .cart-page .cart-quantity-form { display: flex; gap: 7px; align-items: center; }
+    .cart-page .cart-quantity-input {
+      box-sizing: border-box;
+      width: 64px;
+      padding: 7px;
+      border: 1px solid var(--cart-aqua-light);
+      border-radius: 10px;
+      color: var(--cart-black);
+      text-align: center;
+    }
+    .cart-page .cart-quantity-input:focus {
+      border-color: var(--cart-aqua);
+      outline: 3px solid var(--cart-aqua-light);
+    }
+    .cart-page .cart-update-button { padding: 7px 14px; cursor: pointer; }
+    .cart-page .btn-remove {
+      border-radius: 50%;
+      background: var(--cart-aqua-light);
+      color: var(--cart-aqua);
+    }
+    .cart-page .btn-remove:hover { background: var(--cart-aqua); color: var(--cart-white); }
+    .cart-page .alert-success {
+      border: 1px solid var(--cart-aqua-light);
+      border-left: 3px solid var(--cart-aqua);
+      border-radius: 10px;
+      background: var(--cart-aqua-light);
+      color: var(--cart-black);
+    }
+    .cart-page .site-footer { background: var(--cart-black); color: var(--cart-white); }
+
+    .empty-cart {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .empty-cart i {
+      font-size: 80px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .empty-cart h2 {
+      color: var(--dark);
+      margin-bottom: 10px;
+    }
+
+    .empty-cart p {
+      color: var(--muted);
+      margin-bottom: 30px;
+    }
+
+    .cart-container {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+      margin-top: 30px;
+    }
+
+    .cart-items {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .cart-item {
+      display: grid;
+      grid-template-columns: 100px 1fr auto auto auto;
+      gap: 20px;
+      align-items: center;
+      background: var(--card);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .cart-item-image {
+      width: 100px;
+      height: 100px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .cart-item-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .cart-item-details h3 {
+      margin: 0 0 5px 0;
+      font-size: 18px;
+    }
+
+    .cart-item-category {
+      color: var(--muted);
+      font-size: 14px;
+      text-transform: uppercase;
+      margin: 5px 0;
+    }
+
+    .cart-item-price {
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 16px;
+      margin: 5px 0;
+    }
+
+    .quantity-form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .quantity-form input {
+      width: 60px;
+      padding: 5px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .cart-item-subtotal {
+      text-align: right;
+    }
+
+    .subtotal-price {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 5px;
+    }
+
+    .btn-remove {
+      background: #ff4444;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-remove:hover {
+      background: #cc0000;
+      transform: scale(1.1);
+    }
+
+    .cart-summary {
+      background: var(--card);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      height: fit-content;
+      position: sticky;
+      top: 100px;
+    }
+
+    .cart-summary h2 {
+      margin-top: 0;
+      font-size: 22px;
+      font-family: 'Playfair Display', serif;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      font-size: 16px;
+    }
+
+    .summary-divider {
+      border-top: 2px solid #eee;
+      margin: 15px 0;
+    }
+
+    .summary-total {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .btn-block {
+      width: 100%;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .cart-link {
+      position: relative;
+      padding: 10px 15px;
+    }
+
+    .cart-badge {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: #ff4444;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .alert-success {
+      background: #d4f1d4;
+      color: #2d5e2d;
+      border: 1px solid #a5d6a7;
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .cart-page-main { padding: 32px 14px 48px; }
+      .cart-page .header-inner { flex-wrap: wrap; gap: 10px; }
+      .cart-page .main-nav { flex-wrap: wrap; gap: 4px; }
+      .cart-page .main-nav > a:not(.btn) { padding: 8px 10px; }
+      .cart-page .main-nav > a.cart-link { width: 40px; height: 40px; }
+      .cart-container {
+        grid-template-columns: 1fr;
+      }
+
+      .cart-item {
+        grid-template-columns: 80px 1fr;
+        gap: 10px;
+      }
+
+      .cart-item-quantity,
+      .cart-item-subtotal,
+      .cart-item-remove {
+        grid-column: 1 / -1;
+      }
+      .cart-page .cart-item-subtotal { text-align: left; }
+    }
+
+    .cart-page .site-header .main-nav > a,
+    .cart-page .site-header .main-nav > a:hover,
+    .cart-page .site-header .main-nav > a:focus,
+    .cart-page .site-header .main-nav > a:active,
+    .cart-page .site-header .main-nav > a:visited {
+      border-color: var(--cart-aqua) !important;
+      background-color: var(--cart-aqua) !important;
+      background-image: none !important;
+      color: var(--cart-white) !important;
+      transition: none !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</body>
+</html>

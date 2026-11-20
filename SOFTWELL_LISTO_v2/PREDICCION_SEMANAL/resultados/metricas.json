@@ -1,0 +1,109 @@
+{
+  "metadatos": {
+    "nombre": "Modelo predictivo de demanda SOFTWELL",
+    "version": "1.0",
+    "entrenado": "2026-11-07 15:50",
+    "algoritmo": "Random Forest",
+    "hiperparametros": {
+      "min_samples_leaf": 8,
+      "max_features": 0.6
+    },
+    "objetivo": "unidades vendidas por producto en la semana siguiente (lunes a domingo)",
+    "origen_datos": "simulado",
+    "semanas_entrenamiento": 70,
+    "semanas_prueba": 26,
+    "filas_totales": 1536,
+    "productos": 16,
+    "periodo_datos": "2024-11-04 a 2026-11-01",
+    "scikit_learn": "1.8.0",
+    "metricas_prueba": {
+      "MAE": 1.5791,
+      "RMSE": 2.1095,
+      "R2": 0.4232,
+      "WAPE_%": 53.7999
+    },
+    "precision_agregada": {
+      "WAPE_producto_semana_%": 53.8,
+      "WAPE_categoria_semana_%": 30.909,
+      "WAPE_tienda_semana_%": 21.841,
+      "media_unidades_producto_semana": 2.935,
+      "piso_ruido_MAE_aprox": 1.277
+    },
+    "metricas_referencia_media_4_semanas": {
+      "MAE": 1.7091,
+      "RMSE": 2.2978,
+      "R2": 0.3156,
+      "WAPE_%": 58.231
+    },
+    "nota": "Entrenado con DATOS SIMULADOS: las metricas NO describen ventas reales."
+  },
+  "comparacion": [
+    {
+      "modelo": "Referencia: igual a la semana anterior",
+      "tipo": "referencia",
+      "MAE": 2.1611,
+      "RMSE": 2.8894,
+      "R2": -0.0822,
+      "WAPE_%": 73.6282,
+      "MAE_validacion_cruzada": NaN,
+      "hiperparametros": NaN
+    },
+    {
+      "modelo": "Referencia: promedio ultimas 4 semanas",
+      "tipo": "referencia",
+      "MAE": 1.7091,
+      "RMSE": 2.2978,
+      "R2": 0.3156,
+      "WAPE_%": 58.231,
+      "MAE_validacion_cruzada": NaN,
+      "hiperparametros": NaN
+    },
+    {
+      "modelo": "Ridge (regresion lineal)",
+      "tipo": "modelo",
+      "MAE": 1.6419,
+      "RMSE": 2.2045,
+      "R2": 0.37,
+      "WAPE_%": 55.9413,
+      "MAE_validacion_cruzada": 1.5969,
+      "hiperparametros": "{\"alpha\": 10.0}"
+    },
+    {
+      "modelo": "Random Forest",
+      "tipo": "modelo",
+      "MAE": 1.5791,
+      "RMSE": 2.1095,
+      "R2": 0.4232,
+      "WAPE_%": 53.7999,
+      "MAE_validacion_cruzada": 1.4741,
+      "hiperparametros": "{\"min_samples_leaf\": 8, \"max_features\": 0.6}"
+    },
+    {
+      "modelo": "Gradient Boosting",
+      "tipo": "modelo",
+      "MAE": 1.5711,
+      "RMSE": 2.1174,
+      "R2": 0.4189,
+      "WAPE_%": 53.5277,
+      "MAE_validacion_cruzada": 1.5337,
+      "hiperparametros": "{\"max_depth\": 2, \"learning_rate\": 0.03}"
+    },
+    {
+      "modelo": "HistGradientBoosting (Poisson)",
+      "tipo": "modelo",
+      "MAE": 1.5081,
+      "RMSE": 2.0356,
+      "R2": 0.4629,
+      "WAPE_%": 51.3804,
+      "MAE_validacion_cruzada": 1.5515,
+      "hiperparametros": "{\"max_depth\": 3, \"max_iter\": 150}"
+    }
+  ],
+  "pedidos_total": 3763,
+  "pedidos_pagados": 2746,
+  "fecha_min": "2024-11-04",
+  "fecha_max": "2026-11-01",
+  "unidades_sin_catalogo": 0,
+  "productos_sin_catalogo": [],
+  "ultima_semana_completa": "2026-10-26"
+}

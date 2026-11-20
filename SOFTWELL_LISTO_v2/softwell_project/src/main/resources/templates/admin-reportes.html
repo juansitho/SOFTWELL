@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon-32.ico}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - Admin</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .reports-page {
+            --report-green: var(--admin-green, #00B4B6);
+            --report-green-dark: var(--admin-green-dark, #008F91);
+            --report-green-soft: var(--admin-green-soft, #E5F6F4);
+            --report-border: var(--admin-green-border, #B8E8E3);
+            --report-text: var(--admin-green-text, #145451);
+        }
+        .reports-summary {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin: 0 0 24px;
+        }
+        .reports-summary .stat-card {
+            min-width: 0;
+            min-height: 126px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            border: 1px solid var(--report-border);
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 8px 22px rgba(0, 143, 145, .07);
+            transition: transform .18s ease, box-shadow .18s ease;
+        }
+        .reports-summary .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 26px rgba(0, 143, 145, .12);
+        }
+        .reports-summary .stat-icon {
+            width: 52px;
+            height: 52px;
+            flex: 0 0 52px;
+            display: grid;
+            place-items: center;
+            padding: 0 !important;
+            border-radius: 15px;
+            color: var(--report-green-dark);
+            background: var(--report-green-soft) !important;
+        }
+        .reports-summary .stat-icon i { color: inherit !important; font-size: 22px; }
+        .reports-summary .stat-info { min-width: 0; }
+        .reports-summary .stat-title {
+            display: block;
+            color: #647572;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .reports-summary .stat-value {
+            display: block;
+            margin-top: 5px;
+            color: var(--report-text) !important;
+            font-size: clamp(21px, 2vw, 29px) !important;
+            font-weight: 750;
+            line-height: 1.15;
+            overflow-wrap: anywhere;
+        }
+        .reports-summary .report-value-toggle {
+            width: 100%;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            font-family: inherit;
+            text-align: left;
+            cursor: pointer;
+        }
+        .reports-summary .report-value-toggle:not(.is-expanded) {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-size: clamp(14px, 1.5vw, 22px) !important;
+        }
+        .reports-summary .report-value-toggle.is-expanded {
+            overflow: visible;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            font-size: 19px !important;
+        }
+        .reports-summary .report-value-toggle:focus-visible {
+            outline: 2px solid var(--report-green-dark);
+            outline-offset: 3px;
+            border-radius: 3px;
+        }
+        .reports-summary .stat-note { display: block; margin-top: 5px; color: #71817e; font-size: 11px; }
+        .report-panel {
+            margin-bottom: 22px;
+            padding: 22px;
+            border: 1px solid var(--report-border);
+            border-radius: 17px;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(0, 143, 145, .06);
+        }
+        .report-panel:last-child { margin-bottom: 0; }
+        .report-panel-heading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 0 18px;
+            color: var(--report-text);
+            font-size: 19px;
+            font-weight: 700;
+        }
+        .report-panel-heading > i {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            color: var(--report-green-dark);
+            background: var(--report-green-soft);
+            font-size: 16px;
+        }
+        .report-subheading {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 20px 0 12px;
+            color: var(--report-text);
+            font-size: 15px;
+            font-weight: 700;
+        }
+        .report-subheading.is-warning { color: #9A6A08; }
+        .report-subheading.is-danger { color: #A94343; }
+        .report-table-wrap { width: 100%; overflow-x: auto; }
+        .reports-page .admin-table { min-width: 560px; }
+        .reports-page .admin-table th { padding: 13px 15px; font-size: 12px; }
+        .reports-page .admin-table td { padding: 14px 15px; font-size: 14px; }
+        .report-empty {
+            padding: 30px 16px;
+            border: 1px dashed var(--report-border);
+            border-radius: 13px;
+            color: #71817e;
+            background: #F8FCFB;
+            text-align: center;
+        }
+        .report-empty i { display: block; margin-bottom: 9px; color: var(--report-green-dark); font-size: 24px; }
+        .report-empty.is-good { color: var(--report-text); background: var(--report-green-soft); }
+        .report-stock-count {
+            display: inline-flex;
+            min-width: 36px;
+            justify-content: center;
+            padding: 5px 9px;
+            border-radius: 999px;
+            color: #8A6008;
+            background: #FFF4D8;
+            font-weight: 700;
+        }
+        .report-order-status {
+            display: inline-flex;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            background: #F1F4F3;
+            color: #52615E;
+        }
+        .report-order-status.is-paid { color: #145451; background: var(--report-green-soft); }
+        .report-order-status.is-pending { color: #8A6008; background: #FFF4D8; }
+        .report-order-status.is-rejected { color: #A94343; background: #FCEAEA; }
+        .report-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 11px !important;
+            border: 1px solid var(--report-border);
+            border-radius: 9px;
+            color: var(--report-text) !important;
+            background: var(--report-green-soft);
+            font-size: 12px !important;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .report-action:hover { background: #D5F0ED; }
+        @media (max-width: 1000px) {
+            .reports-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 600px) {
+            .reports-summary { grid-template-columns: 1fr; gap: 11px; }
+            .reports-summary .stat-card { min-height: 100px; padding: 16px; }
+            .report-panel { padding: 16px; }
+            .report-panel-heading { font-size: 17px; }
+        }
+    </style>
+</head>
+<body class="admin-app">
+
+<div class="admin-container">
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar}"></aside>
+
+    <main class="main-content admin-main-content">
+        <header class="admin-header">
+            <h1><i class="fas fa-chart-bar"></i> Reportes</h1>
+        </header>
+
+        <section class="content-section active reports-page">
+
+            <!-- RESUMEN GENERAL -->
+            <div class="reports-summary">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-title">Ingresos Totales</span>
+                        <button type="button" class="stat-value report-value-toggle"
+                                aria-expanded="false" title="Presiona para ver el valor completo"
+                                aria-label="Presiona para ver el valor completo de ingresos"
+                                th:text="'COP $ ' + ${#numbers.formatDecimal(ingresosTotales, 1, 'POINT', 0, 'COMMA')}">COP $ 0</button>
+                        <span class="stat-note">Solo pedidos pagados</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-title">Pedidos Pagados</span>
+                        <span class="stat-value" th:text="${pedidosPagados}">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-title">Pedidos Pendientes</span>
+                        <span class="stat-value" th:text="${pedidosPendientes}">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-title">Pedidos Rechazados</span>
+                        <span class="stat-value" th:text="${pedidosRechazados}">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INGRESOS POR MES -->
+            <div class="report-panel">
+                <h2 class="report-panel-heading">
+                    <i class="fas fa-chart-line"></i> Ingresos por Mes
+                </h2>
+                <div th:if="${ingresosPorMes.isEmpty()}" class="report-empty">
+                    <i class="fas fa-chart-column"></i>
+                    No hay pedidos pagados registrados aún.
+                </div>
+                <div th:unless="${ingresosPorMes.isEmpty()}" class="report-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Mes</th>
+                            <th>Pedidos Pagados</th>
+                            <th>Ingresos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="entry : ${ingresosPorMes}">
+                            <td th:text="${entry.mes}">Enero 2026</td>
+                            <td th:text="${entry.cantidad}">0</td>
+                            <td th:text="'COP $ ' + ${#numbers.formatDecimal(entry.total, 1, 'POINT', 0, 'COMMA')}">COP $ 0</td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+
+            <!-- ALERTAS DE STOCK -->
+            <div class="report-panel">
+                <h2 class="report-panel-heading">
+                    <i class="fas fa-boxes-stacked"></i> Alertas de Inventario
+                </h2>
+
+                <div th:if="${productosAgotados.isEmpty() and productosBajoStock.isEmpty()}"
+                     class="report-empty is-good">
+                    <i class="fas fa-circle-check"></i> Todo el inventario está en buen estado.
+                </div>
+
+                <div th:unless="${productosAgotados.isEmpty()}" class="report-table-wrap">
+                    <h3 class="report-subheading is-danger">
+                        <i class="fas fa-circle-exclamation"></i> Productos Agotados en Tienda
+                    </h3>
+                    <table class="admin-table">
+                        <thead>
+                            <tr><th>Nombre</th><th>Categoría</th><th>En Bodega</th><th>Acción</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${productosAgotados}">
+                                <td th:text="${p.nombre}"></td>
+                                <td th:text="${p.categoria}"></td>
+                                <td><span class="report-stock-count" th:text="${p.stockProveedor - p.stock}"></span></td>
+                                <td>
+                                    <a th:href="@{/admin/productos}" class="report-action">
+                                        <i class="fas fa-arrow-up"></i> Subir de bodega
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div th:unless="${productosBajoStock.isEmpty()}" class="report-table-wrap">
+                    <h3 class="report-subheading is-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Productos con Stock Bajo (menos de 3 uds.)
+                    </h3>
+                    <table class="admin-table">
+                        <thead>
+                            <tr><th>Nombre</th><th>Categoría</th><th>En Tienda</th><th>En Bodega</th><th>Acción</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${productosBajoStock}">
+                                <td th:text="${p.nombre}"></td>
+                                <td th:text="${p.categoria}"></td>
+                                <td><span class="report-stock-count" th:text="${p.stock}"></span></td>
+                                <td><span th:text="${p.stockProveedor - p.stock}"></span></td>
+                                <td>
+                                    <a th:href="@{/admin/productos}" class="report-action">
+                                        <i class="fas fa-arrow-up"></i> Subir de bodega
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ÚLTIMOS PEDIDOS -->
+            <div class="report-panel">
+                <h2 class="report-panel-heading">
+                    <i class="fas fa-receipt"></i> Últimos 10 Pedidos
+                </h2>
+                <div th:if="${ultimosPedidos.isEmpty()}" class="report-empty">
+                    <i class="fas fa-receipt"></i>
+                    No hay pedidos registrados aún.
+                </div>
+                <div th:unless="${ultimosPedidos.isEmpty()}" class="report-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Cliente</th>
+                            <th>Fecha</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${ultimosPedidos}">
+                            <td th:text="${p.id}"></td>
+                            <td th:text="${p.nombreCliente}"></td>
+                            <td th:text="${#temporals.format(p.fechaCreacion, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td th:text="'COP $ ' + ${#numbers.formatDecimal(p.totalActualizado, 1, 'POINT', 0, 'COMMA')}"></td>
+                            <td>
+                                <span class="report-order-status"
+                                      th:classappend="${p.estado == 'PAGADO'} ? ' is-paid' :
+                                                      (${p.estado == 'PENDIENTE'} ? ' is-pending' : ' is-rejected')"
+                                      th:text="${p.estado}">
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+
+        </section>
+    </main>
+</div>
+
+<script>
+    document.querySelectorAll('.report-value-toggle').forEach(function (value) {
+        value.addEventListener('click', function () {
+            var expanded = value.classList.toggle('is-expanded');
+            value.setAttribute('aria-expanded', String(expanded));
+            value.title = expanded ? 'Presiona para contraer el valor' : 'Presiona para ver el valor completo';
+        });
+    });
+</script>
+
+</body>
+</html>

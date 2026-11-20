@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon-32.ico}">
+    <title>Formulario de Proveedor</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="admin-app">
+    <div class="admin-container">
+        <aside th:replace="~{fragments/admin-sidebar :: sidebar}"></aside>
+        <main class="admin-main-content">
+    <h1 th:text="${proveedor.id == null ? 'Nuevo Proveedor' : 'Editar Proveedor'}"></h1>
+    <form th:action="@{/admin/proveedores/guardar}" th:object="${proveedor}" method="post">
+        <input type="hidden" th:field="*{id}" />
+        <div>
+            <label>Nombre:</label>
+            <input type="text" th:field="*{nombre}" required />
+        </div>
+        <div>
+            <label>Email:</label>
+            <input type="email" th:field="*{email}" required />
+        </div>
+        <div>
+            <label>Teléfono:</label>
+            <input type="text" th:field="*{telefono}" />
+        </div>
+        <div>
+            <label>Dirección:</label>
+            <input type="text" th:field="*{direccion}" />
+        </div>
+        <button type="submit">Guardar Proveedor</button>
+    </form>
+    <a th:href="@{/admin/proveedores}">Cancelar</a>
+        </main>
+    </div>
+</body>
+</html>

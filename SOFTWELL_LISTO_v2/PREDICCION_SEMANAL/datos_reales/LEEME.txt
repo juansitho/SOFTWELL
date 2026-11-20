@@ -1,0 +1,8 @@
+Para predecir con TUS ventas reales, guarda aqui dos archivos con estos nombres exactos:
+
+  pedidos_softwell.csv  -> en SOFTWELL (como ADMIN) abre /admin/analitica y pulsa "Exportar dataset (CSV)"
+  productos.csv         -> exporta la coleccion "products" desde MongoDB Compass o Atlas (Export Collection > CSV)
+                           con las columnas: nombre, categoria, precio, stock
+
+Luego ejecuta de nuevo PREDICCION_SEMANAL.bat. Si estos dos archivos existen, se usan en vez de los datos de demostracion.
+Se necesitan al menos 8 semanas completas con pedidos PAGADO.

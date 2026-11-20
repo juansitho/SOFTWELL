@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon-32.ico}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Pedido - Admin</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body.admin-app .admin-order-detail {
+            width: min(100%, 1440px);
+            margin: 0 auto;
+            padding: clamp(16px, 3vw, 42px);
+            box-sizing: border-box;
+        }
+
+        .admin-order-detail-card {
+            min-width: 0;
+            padding: clamp(20px, 4vw, 54px);
+            border-radius: 30px;
+            background: #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .05);
+        }
+
+        .admin-order-detail-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 34px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .admin-order-detail-header h1 {
+            min-width: 0;
+            margin: 0;
+            color: #00B4B6;
+            font-size: clamp(19px, 2.2vw, 27px);
+            letter-spacing: .04em;
+            overflow-wrap: anywhere;
+        }
+
+        .admin-order-detail-date {
+            flex: 0 0 auto;
+            color: #888;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .admin-order-detail-grid {
+            display: grid;
+            grid-template-columns: minmax(270px, 320px) minmax(0, 1fr);
+            align-items: start;
+            gap: clamp(24px, 4vw, 44px);
+        }
+
+        .admin-order-detail-section {
+            min-width: 0;
+            margin-bottom: 28px;
+        }
+
+        .admin-order-detail-section h2 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 0 20px;
+            color: #00B4B6;
+            font-size: 19px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .admin-order-detail-section h2::before {
+            width: 4px;
+            height: 22px;
+            border-radius: 2px;
+            background: #00B4B6;
+            content: "";
+        }
+
+        .admin-order-info-card,
+        .admin-order-summary {
+            padding: 20px;
+            border: 1px solid #00B4B6;
+            border-radius: 16px;
+            background: #E8F8F8;
+        }
+
+        .admin-order-info-card p {
+            margin: 8px 0;
+            color: #444;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .admin-order-summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 10px;
+            color: #222;
+            font-size: 15px;
+        }
+
+        .admin-order-summary-row strong {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .admin-order-summary-row.total {
+            margin: 16px 0 0;
+            padding-top: 15px;
+            border-top: 1px solid #00B4B6;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .admin-order-summary-row.total strong {
+            font-size: 19px;
+        }
+
+        .admin-order-back {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            width: 100%;
+            min-height: 48px;
+            margin-top: -6px;
+            padding: 12px 16px;
+            border: 2px solid #00B4B6;
+            border-radius: 12px;
+            color: #00A7A9;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            text-transform: uppercase;
+            transition: color .18s ease, background-color .18s ease;
+        }
+
+        .admin-order-back:hover {
+            color: #fff;
+            background: #00B4B6;
+        }
+
+        .admin-order-items-card {
+            min-width: 0;
+            padding: 26px;
+            border: 1px solid #00B4B6;
+            border-radius: 16px;
+            background: #E8F8F8;
+        }
+
+        .admin-order-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .admin-order-image {
+            display: grid;
+            width: 108px;
+            height: 108px;
+            place-items: center;
+            overflow: hidden;
+            border: 2px solid #00B4B6;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        .admin-order-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .admin-order-items-divider {
+            margin: 20px 0;
+            border: 0;
+            border-top: 1px solid rgba(0, 180, 182, .65);
+        }
+
+        .admin-order-items-description {
+            color: #333;
+            font-size: 15px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .admin-order-items-description p {
+            margin: 0 0 8px;
+        }
+
+        .admin-order-items-subtotal {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin: 16px 0 0;
+            padding-top: 12px;
+            border-top: 1px dashed #00B4B6;
+        }
+
+        .admin-order-items-subtotal strong:last-child {
+            white-space: nowrap;
+        }
+
+        @media (max-width: 900px) {
+            .admin-order-detail-grid {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 4px;
+            }
+
+            .admin-order-detail-card {
+                padding: clamp(18px, 4vw, 32px);
+                border-radius: 22px;
+            }
+
+            .admin-order-items-card {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            body.admin-app .admin-order-detail {
+                padding: 14px;
+            }
+
+            .admin-order-detail-header {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 8px;
+                margin-bottom: 26px;
+            }
+
+            .admin-order-image {
+                width: 82px;
+                height: 82px;
+            }
+        }
+    </style>
+</head>
+<body class="admin-app">
+<div class="admin-container">
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar}"></aside>
+
+    <main class="main-content admin-main-content">
+        <section class="admin-order-detail">
+            <div class="admin-order-detail-card">
+                <header class="admin-order-detail-header">
+                    <h1 th:text="'ID DE COMPRA: #' + ${pedido.id}">Detalle del Pedido</h1>
+                    <time class="admin-order-detail-date"
+                          th:text="${#temporals.format(pedido.fechaCreacion, 'dd-MM-yyyy HH:mm')}"></time>
+                </header>
+
+                <div class="admin-order-detail-grid">
+                    <aside>
+                        <section class="admin-order-detail-section">
+                            <h2>Envío</h2>
+                            <div class="admin-order-info-card">
+                                <p><strong>Cliente:</strong> <span th:text="${pedido.nombreCliente}"></span></p>
+                                <p><strong>Dirección:</strong> <span th:text="${pedido.direccionCliente}"></span></p>
+                                <p><strong>Teléfono:</strong> <span th:text="${pedido.telefonoCliente}"></span></p>
+                                <p><strong>Email:</strong> <span th:text="${pedido.emailCliente}"></span></p>
+                            </div>
+                        </section>
+
+                        <section class="admin-order-detail-section">
+                            <h2>Resumen</h2>
+                            <div class="admin-order-summary">
+                                <div class="admin-order-summary-row">
+                                    <span>Subtotal:</span>
+                                    <strong th:text="'COP $ ' + ${#numbers.formatDecimal(pedido.total - pedido.iva - pedido.costoEnvio, 1, 'POINT', 0, 'COMMA')}"></strong>
+                                </div>
+                                <div class="admin-order-summary-row">
+                                    <span>IVA:</span>
+                                    <strong th:text="'COP $ ' + ${#numbers.formatDecimal(pedido.iva, 1, 'POINT', 0, 'COMMA')}"></strong>
+                                </div>
+                                <div class="admin-order-summary-row">
+                                    <span>Envío:</span>
+                                    <strong th:text="'COP $ ' + ${#numbers.formatDecimal(pedido.costoEnvioActualizado, 1, 'POINT', 0, 'COMMA')}"></strong>
+                                </div>
+                                <div class="admin-order-summary-row total">
+                                    <span>TOTAL</span>
+                                    <strong th:text="'COP $ ' + ${#numbers.formatDecimal(pedido.totalActualizado, 1, 'POINT', 0, 'COMMA')}"></strong>
+                                </div>
+                            </div>
+                        </section>
+
+                        <a th:href="@{/admin/pedidos}" class="admin-order-back">
+                            <i class="fas fa-arrow-left" aria-hidden="true"></i> Volver a pedidos
+                        </a>
+                    </aside>
+
+                    <div>
+                        <section class="admin-order-detail-section">
+                            <h2>Artículos</h2>
+                            <div class="admin-order-items-card">
+                                <div class="admin-order-images">
+                                    <div class="admin-order-image"
+                                         th:each="imgUrl : ${#strings.arraySplit(pedido.imagenesItems, ',')}">
+                                        <img th:src="${imgUrl}" alt="Imagen del artículo"
+                                             onerror="this.src='/img/placeholder.webp'">
+                                    </div>
+                                </div>
+                                <hr class="admin-order-items-divider">
+                                <div class="admin-order-items-description">
+                                    <p><strong>Productos:</strong></p>
+                                    <p th:text="${pedido.descripcionItems}">No hay detalles disponibles.</p>
+                                    <p class="admin-order-items-subtotal">
+                                        <strong>Subtotal de joyas:</strong>
+                                        <strong th:text="'COP $ ' + ${#numbers.formatDecimal(pedido.total - pedido.iva - pedido.costoEnvio, 1, 'POINT', 0, 'COMMA')}"></strong>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

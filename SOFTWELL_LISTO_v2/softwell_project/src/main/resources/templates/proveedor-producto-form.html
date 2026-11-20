@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon-32.ico}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${producto.id == null ? 'Agregar Nueva Joya | Softwell' : 'Editar Joya | Softwell'}">Agregar Nueva Joya | Softwell</title>
+    
+    <!-- Tipografías elegantes: Serif para títulos de alta gama y Sans-Serif limpia para textos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos base y FontAwesome -->
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --turquesa: #00B8B5;
+            --turquesa-dark: #009896;
+            --turquesa-light: #E0F7F6;
+            --dorado: #B8860B;
+            --dorado-hover: #9A6A08;
+            --bg-lavender: #F5F2F8;
+            --white: #FFFFFF;
+            --text-main: #292438;
+            --text-muted: #766E85;
+            --border-color: #E5DDEC;
+            --radius-card: 24px;
+            --radius-inner: 16px;
+            --shadow-soft: 0 16px 40px rgba(41, 36, 56, 0.05), 0 3px 10px rgba(41, 36, 56, 0.03);
+            --shadow-turquesa: 0 18px 45px rgba(0, 184, 181, 0.28);
+        }
+
+        body {
+            background-color: var(--bg-lavender) !important;
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .jewel-wrapper {
+            max-width: 1260px;
+            margin: 0 auto;
+            padding: 32px 24px 70px 24px;
+        }
+
+        /* --- Header de la página --- */
+        .jewel-page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-title-group h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 2.15rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0 0 6px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .header-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .btn-back-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 12px;
+            background: var(--white);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.88rem;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(41, 36, 56, 0.04);
+        }
+
+        .btn-back-nav:hover {
+            color: var(--turquesa);
+            border-color: var(--turquesa);
+            transform: translateX(-3px);
+            background: var(--white);
+        }
+
+        /* Alerta de error */
+        .alert-lux-error {
+            background: #FDF2F2;
+            border: 1px solid #F8B4B4;
+            color: #9B1C1C;
+            border-radius: 14px;
+            padding: 14px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.92rem;
+            font-weight: 500;
+        }
+
+        /* --- Grid Principal: 2 Columnas --- */
+        .jewel-main-grid {
+            display: grid;
+            grid-template-columns: 390px 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        /* ========================================================
+           COLUMNA IZQUIERDA: TARJETA TURQUESA (#00B8B5)
+           ======================================================== */
+        .preview-sidebar-col {
+            position: sticky;
+            top: 24px;
+        }
+
+        .turquoise-preview-card {
+            background: linear-gradient(170deg, var(--turquesa) 0%, var(--turquesa-dark) 100%);
+            border-radius: var(--radius-card);
+            padding: 28px;
+            color: var(--white);
+            box-shadow: var(--shadow-turquesa);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Detalle decorativo sutil de fondo */
+        .turquoise-preview-card::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            pointer-events: none;
+        }
+
+        .preview-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.22);
+            color: var(--white);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .preview-destacado-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #FFE082;
+            color: #5D4037;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Área para subir fotografía: Borde discontinuo */
+        .upload-dropzone-box {
+            border: 2px dashed rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius-inner);
+            min-height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s ease;
+            padding: 16px;
+        }
+
+        .upload-dropzone-box:hover,
+        .upload-dropzone-box.drag-over {
+            border-color: var(--white);
+            background: rgba(255, 255, 255, 0.22);
+            transform: translateY(-2px);
+        }
+
+        .file-input-hidden {
+            display: none;
+        }
+
+        .upload-placeholder-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .diamond-icon-wrapper {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.22);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--white);
+            margin-bottom: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        }
+
+        .upload-main-text {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: 0.2px;
+        }
+
+        .upload-sub-text {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.88);
+            margin-bottom: 8px;
+        }
+
+        .upload-btn-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--white);
+            color: var(--turquesa-dark);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Contenedor de imagen cargada */
+        .image-loaded-wrapper {
+            width: 100%;
+            height: 220px;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        #joya-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        .image-hover-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.88rem;
+            border-radius: 12px;
+        }
+
+        .upload-dropzone-box:hover .image-hover-overlay {
+            opacity: 1;
+        }
+
+        /* Datos de la joya en la tarjeta turquesa */
+        .preview-info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .preview-category-pill {
+            display: inline-block;
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.22);
+            color: var(--white);
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .preview-product-name {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.45rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--white);
+            line-height: 1.25;
+            word-break: break-word;
+        }
+
+        /* Desglose de precios en la tarjeta turquesa */
+        .preview-pricing-card {
+            background: rgba(255, 255, 255, 0.16);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            border-radius: var(--radius-inner);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .preview-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .price-row-label {
+            font-size: 0.84rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .price-row-value {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--white);
+        }
+
+        .public-price-row .price-row-label {
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+
+        .public-price-row .primary-val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+        }
+
+        .preview-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.22);
+            margin: 2px 0;
+        }
+
+        /* Total de la oferta */
+        .preview-total-offer-box {
+            background: rgba(0, 0, 0, 0.16);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .total-offer-header span {
+            display: block;
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: var(--white);
+        }
+
+        .total-offer-header small {
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .total-offer-amount {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--white);
+            letter-spacing: -0.3px;
+        }
+
+        .preview-card-footer {
+            font-size: 0.76rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        /* ========================================================
+           COLUMNA DERECHA: TARJETA BLANCA (#FFFFFF) - FORMULARIO
+           ======================================================== */
+        .white-form-card {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-card);
+            padding: 40px;
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            flex-direction: column;
+            gap: 36px;
+        }
+
+        /* Encabezados de sección */
+        .form-section-block {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-number-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--bg-lavender);
+            color: var(--turquesa-dark);
+            border: 1.5px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.05rem;
+            flex-shrink: 0;
+        }
+
+        .section-heading {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .section-subheading {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin: 3px 0 0 0;
+        }
+
+        /* Cuadrícula de 2 columnas para campos */
+        .form-fields-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group-lux {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label-lux {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .form-label-lux .req {
+            color: var(--turquesa);
+            font-weight: 700;
+        }
+
+        /* Contenedores con icono / prefijo */
+        .input-icon-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .input-icon-lux {
+            position: absolute;
+            left: 14px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .input-prefix-lux {
+            position: absolute;
+            left: 14px;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 1rem;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .form-control-lux {
+            width: 100%;
+            border: 1.5px solid var(--border-color);
+            background: var(--white);
+            color: var(--text-main);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .form-control-lux:focus {
+            outline: none;
+            border-color: var(--turquesa);
+            box-shadow: 0 0 0 4px rgba(0, 184, 181, 0.12);
+        }
+
+        .form-control-lux.with-icon {
+            padding-left: 42px;
+        }
+
+        .form-control-lux.with-prefix {
+            padding-left: 36px;
+        }
+
+        .form-control-lux.with-currency-prefix {
+            padding-left: 72px;
+        }
+
+        select.form-control-lux {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23766E85' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        .textarea-lux {
+            resize: vertical;
+            min-height: 90px;
+            line-height: 1.5;
+        }
+
+        .field-hint {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* --- Nota legal (Ley 1480 de 2011) --- */
+        .legal-note-box {
+            background: #FAF8FD;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--turquesa);
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+        }
+
+        .legal-note-icon {
+            color: var(--turquesa);
+            font-size: 1.25rem;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .legal-note-text {
+            font-size: 0.83rem;
+            color: #5A5269;
+            line-height: 1.5;
+        }
+
+        .legal-note-text strong {
+            display: block;
+            color: var(--text-main);
+            margin-bottom: 2px;
+        }
+
+        /* --- Desglose de precios en formulario --- */
+        .price-breakdown-card {
+            background: #FBF9FC;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-inner);
+            padding: 18px 20px;
+            margin-top: 6px;
+        }
+
+        .breakdown-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: var(--text-main);
+            margin-bottom: 12px;
+        }
+
+        .breakdown-header i {
+            color: var(--turquesa);
+        }
+
+        .breakdown-items-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .breakdown-box {
+            background: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .b-label {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .b-value {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .breakdown-box.highlight-iva .b-value {
+            color: var(--turquesa-dark);
+        }
+
+        .breakdown-box.highlight-margin .b-value {
+            color: var(--dorado);
+        }
+
+        /* --- Interruptor moderno para Destacado --- */
+        .modern-switch-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: #FBF9FC;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-inner);
+            margin-top: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .modern-switch-container:hover {
+            border-color: #D3C7DC;
+        }
+
+        .switch-toggle {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+            flex-shrink: 0;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .switch-input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .switch-track {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: #D8CFE3;
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+
+        .switch-thumb {
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--white);
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .switch-input:checked ~ .switch-track {
+            background-color: var(--turquesa);
+        }
+
+        .switch-input:checked ~ .switch-track .switch-thumb {
+            transform: translateX(22px);
+        }
+
+        .switch-label-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .switch-main-label {
+            font-weight: 700;
+            font-size: 0.92rem;
+            color: var(--text-main);
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .switch-sub-label {
+            font-size: 0.79rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* --- Botones (Inferior Derecha) --- */
+        .form-action-footer {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 14px;
+            margin-top: 10px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-cancel-luxury {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.92rem;
+            text-decoration: none;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel-luxury:hover {
+            background: var(--bg-lavender);
+            color: var(--text-main);
+            border-color: #D3C7DC;
+        }
+
+        .btn-submit-turquoise {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 32px;
+            border-radius: 12px;
+            background: var(--turquesa);
+            color: var(--white);
+            font-weight: 700;
+            font-size: 0.98rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0, 184, 181, 0.35);
+            transition: all 0.25s ease;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-submit-turquoise:hover {
+            background: var(--turquesa-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(0, 152, 150, 0.45);
+            color: var(--white);
+        }
+
+        .btn-submit-turquoise:active {
+            transform: translateY(0);
+        }
+
+        /* ========================================================
+           DISEÑO ADAPTABLE (RESPONSIVE)
+           ======================================================== */
+        @media (max-width: 1080px) {
+            .jewel-main-grid {
+                grid-template-columns: 340px 1fr;
+                gap: 24px;
+            }
+            .white-form-card {
+                padding: 30px;
+            }
+            .breakdown-items-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 860px) {
+            .jewel-wrapper {
+                padding: 20px 16px 50px 16px;
+            }
+            .jewel-main-grid {
+                grid-template-columns: 1fr;
+                gap: 28px;
+            }
+            .preview-sidebar-col {
+                order: 1; /* Vista previa primero en celulares */
+                position: static;
+            }
+            .form-main-col {
+                order: 2; /* Formulario después en celulares */
+            }
+            .form-fields-grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .white-form-card {
+                padding: 24px 20px;
+            }
+            .form-action-footer {
+                flex-direction: column-reverse;
+                width: 100%;
+            }
+            .btn-cancel-luxury,
+            .btn-submit-turquoise {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="jewel-wrapper">
+        
+        <!-- Header superior -->
+        <header class="jewel-page-header">
+            <div class="header-title-group">
+                <h1 th:text="${producto.id == null ? 'Agregar Nueva Joya' : 'Editar Joya'}">Agregar Nueva Joya</h1>
+                <p class="header-subtitle">Gestión de suministro exclusivo y fijación de condiciones comerciales con Softwell.</p>
+            </div>
+            <a th:href="@{/proveedor/productos}" class="btn-back-nav">
+                <i class="fas fa-arrow-left"></i> Volver a Mis Ofertas
+            </a>
+        </header>
+
+        <!-- Mensaje de error si existe -->
+        <div th:if="${error}" class="alert-lux-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- FORMULARIO EN DOS COLUMNAS -->
+        <form th:action="@{/proveedor/productos/guardar}" th:object="${producto}" method="post" enctype="multipart/form-data" class="jewel-main-grid" id="jewelForm">
+            <input type="hidden" th:field="*{id}" />
+
+            <!-- ========================================================
+                 COLUMNA IZQUIERDA: VISTA PREVIA DE LA JOYA (COLOR TURQUESA)
+                 ======================================================== -->
+            <aside class="preview-sidebar-col">
+                <div class="turquoise-preview-card">
+                    
+                    <div class="preview-card-header">
+                        <span class="preview-chip"><i class="fas fa-sparkles"></i> Vista Previa en Vivo</span>
+                        <span class="preview-destacado-badge" id="preview-destacado-badge" style="display:none;">
+                            <i class="fas fa-star"></i> Destacada
+                        </span>
+                    </div>
+
+                    <!-- Área para subir la fotografía de la joya (Borde discontinuo) -->
+                    <div class="upload-dropzone-box" id="dropzoneArea" onclick="document.getElementById('imagenArchivo').click()">
+                        <!-- Campo input de archivo original conservado -->
+                        <input type="file" id="imagenArchivo" name="imagenArchivo" class="file-input-hidden" accept="image/*" />
+
+                        <!-- Mensaje / icono de diamante cuando no hay imagen cargada -->
+                        <div id="uploadPlaceholder" class="upload-placeholder-content" 
+                             th:style="${(producto.imagen != null and producto.imagen != '') ? 'display: none;' : 'display: flex;'}">
+                            <div class="diamond-icon-wrapper">
+                                <i class="fas fa-gem"></i>
+                            </div>
+                            <span class="upload-main-text">Sube una fotografía</span>
+                            <span class="upload-sub-text">Arrastra o haz clic para seleccionar</span>
+                            <span class="upload-btn-chip">
+                                <i class="fas fa-camera"></i> Explorar Imagen
+                            </span>
+                        </div>
+
+                        <!-- Vista previa real de la imagen seleccionada -->
+                        <div id="imageLoadedWrapper" class="image-loaded-wrapper" 
+                             th:style="${(producto.imagen != null and producto.imagen != '') ? 'display: block;' : 'display: none;'}">
+                            <img id="joya-preview" 
+                                 th:src="${(producto.imagen != null and producto.imagen != '') ? producto.imagen : ''}" 
+                                 alt="Vista previa de la joya" />
+                            <div class="image-hover-overlay">
+                                <span><i class="fas fa-sync-alt"></i> Cambiar fotografía</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nombre y Categoría en la tarjeta turquesa -->
+                    <div class="preview-info-section">
+                        <span class="preview-category-pill" id="preview-categoria" 
+                              th:text="${producto.categoria != null and producto.categoria != '' ? producto.categoria : 'Categoría'}">Categoría</span>
+                        <h3 class="preview-product-name" id="preview-nombre" 
+                            th:text="${producto.nombre != null and producto.nombre != '' ? producto.nombre : 'Nombre de la Joya'}">Nombre de la Joya</h3>
+                    </div>
+
+                    <!-- Desglose Financiero en la tarjeta turquesa -->
+                    <div class="preview-pricing-card">
+                        <div class="preview-price-row public-price-row">
+                            <span class="price-row-label">Precio al Público:</span>
+                            <span class="price-row-value primary-val" id="preview-precio-display">COP $ 0</span>
+                        </div>
+
+                        <div class="preview-divider"></div>
+
+                        <div class="preview-price-row">
+                            <span class="price-row-label">Base sin IVA:</span>
+                            <span class="price-row-value" id="preview-base-display">COP $ 0</span>
+                        </div>
+
+                        <div class="preview-price-row">
+                            <span class="price-row-label" id="preview-iva-label-card">IVA Aplicado (19%):</span>
+                            <span class="price-row-value" id="preview-iva-display">COP $ 0</span>
+                        </div>
+
+                        <div class="preview-divider"></div>
+
+                        <!-- Total de la oferta -->
+                        <div class="preview-total-offer-box">
+                            <div class="total-offer-header">
+                                <span>Total de la Oferta</span>
+                                <small>(Costo × Cantidad)</small>
+                            </div>
+                            <div class="total-offer-amount" id="preview-total-oferta">COP $ 0</div>
+                        </div>
+                    </div>
+
+                    <div class="preview-card-footer">
+                        <i class="fas fa-check-circle"></i> Actualización automática en tiempo real
+                    </div>
+
+                </div>
+            </aside>
+
+            <!-- ========================================================
+                 COLUMNA DERECHA: FORMULARIO PRINCIPAL (TARJETA BLANCA)
+                 ======================================================== -->
+            <main class="form-main-col">
+                <div class="white-form-card">
+                    
+                    <!-- SECCIÓN 1: DATOS DE LA PIEZA -->
+                    <section class="form-section-block">
+                        <div class="section-title-wrap">
+                            <div class="section-number-badge">1</div>
+                            <div>
+                                <h2 class="section-heading">Datos de la Pieza</h2>
+                                <p class="section-subheading">Identificación comercial, categoría y especificaciones de la joya</p>
+                            </div>
+                        </div>
+
+                        <div class="form-fields-grid-2">
+                            <div class="form-group-lux">
+                                <label for="nombre" class="form-label-lux">
+                                    Nombre de la Joya <span class="req">*</span>
+                                </label>
+                                <div class="input-icon-container">
+                                    <i class="fas fa-tag input-icon-lux"></i>
+                                    <input type="text" id="nombre" th:field="*{nombre}" class="form-control-lux with-icon" 
+                                           placeholder="Ej: Anillo Solitario Oro Blanco 18k" required />
+                                </div>
+                            </div>
+
+                            <div class="form-group-lux">
+                                <label for="categoria" class="form-label-lux">
+                                    Categoría <span class="req">*</span>
+                                </label>
+                                <div class="input-icon-container">
+                                    <i class="fas fa-gem input-icon-lux"></i>
+                                    <select id="categoria" th:field="*{categoria}" class="form-control-lux with-icon" required>
+                                        <option value="">Seleccione...</option>
+                                        <option value="Anillos">Anillos</option>
+                                        <option value="Collares">Collares</option>
+                                        <option value="Pulseras">Pulseras</option>
+                                        <option value="Aretes">Aretes</option>
+                                        <option value="Cadenas">Cadenas</option>
+                                        <option value="Dijes">Dijes</option>
+                                        <option value="Tobilleras">Tobilleras</option>
+                                        <option value="Relojes">Relojes</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group-lux">
+                            <label for="descripcion" class="form-label-lux">Descripción</label>
+                            <textarea id="descripcion" th:field="*{descripcion}" class="form-control-lux textarea-lux" rows="4" 
+                                      placeholder="Describa el diseño, acabados, tipos de engaste, quilataje o materiales empleados..."></textarea>
+                            <span class="field-hint">Esta información se exhibirá en la ficha técnica para el comprador final.</span>
+                        </div>
+                    </section>
+
+                    <!-- SECCIÓN 2: PRECIO E IMPUESTOS -->
+                    <section class="form-section-block">
+                        <div class="section-title-wrap">
+                            <div class="section-number-badge">2</div>
+                            <div>
+                                <h2 class="section-heading">Precio e Impuestos</h2>
+                                <p class="section-subheading">Cumplimiento del Estatuto del Consumidor y desglose de transparencia</p>
+                            </div>
+                        </div>
+
+                        <!-- Sustento Legal: Artículos 26 y 28 de la Ley 1480 de 2011 -->
+                        <div class="legal-note-box">
+                            <div class="legal-note-icon">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <div class="legal-note-text">
+                                <strong>Sustento Legal (Art. 26 y 28 de la Ley 1480 de 2011):</strong>
+                                <span>Este formulario aplica el principio de <em>Información Pública de Precios</em>. El precio final debe incluir todos los impuestos (IVA 19%) para garantizar la transparencia y cumplir con la fijación de precios basada en costos.</span>
+                            </div>
+                        </div>
+
+                        <div class="form-fields-grid-2">
+                            <div class="form-group-lux">
+                                <label for="precio" class="form-label-lux">
+                                    Precio Final Sugerido al Público (IVA incluido) <span class="req">*</span>
+                                </label>
+                                <div class="input-icon-container">
+                                    <span class="input-prefix-lux">COP $</span>
+                                    <input type="text" id="precio" th:field="*{precio}" class="form-control-lux with-prefix with-currency-prefix" 
+                                           inputmode="decimal" data-max-fraction-digits="2" placeholder="0" required />
+                                </div>
+                                <span class="field-hint">Cumpliendo Art. 26 Ley 1480: Debe ser el valor total que pagará el cliente.</span>
+                            </div>
+
+                            <div class="form-group-lux">
+                                <label for="ivaPorcentaje" class="form-label-lux">
+                                    Porcentaje de IVA Aplicable (%) <span class="req">*</span>
+                                </label>
+                                <div class="input-icon-container">
+                                    <span class="input-prefix-lux">%</span>
+                                    <input type="text" id="ivaPorcentaje" value="19" class="form-control-lux with-prefix" 
+                                           inputmode="decimal" data-max-fraction-digits="2" placeholder="19" />
+                                </div>
+                                <span class="field-hint">Ajuste este valor según la normativa vigente (ej: 19, 5 o 0).</span>
+                            </div>
+                        </div>
+
+                        <!-- Desglose de Precios (Cálculos conservados) -->
+                        <div id="desglosePrecios" class="price-breakdown-card" style="display:none;">
+                            <div class="breakdown-header">
+                                <i class="fas fa-calculator"></i>
+                                <span>Desglose de Transparencia:</span>
+                            </div>
+                            <div class="breakdown-items-row">
+                                <div class="breakdown-box">
+                                    <span class="b-label">Base Gravable (Antes de IVA):</span>
+                                    <span id="baseGravable" class="b-value">COP $ 0</span>
+                                </div>
+                                <div class="breakdown-box highlight-iva">
+                                    <span id="ivaLabel" class="b-label">IVA Incluido (19%):</span>
+                                    <span id="ivaMonto" class="b-value">COP $ 0</span>
+                                </div>
+                                <div class="breakdown-box highlight-margin">
+                                    <span class="b-label">Margen Comercial Bruto:</span>
+                                    <span id="margenComercial" class="b-value">COP $ 0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- SECCIÓN 3: OFERTA AL ADMINISTRADOR -->
+                    <section class="form-section-block">
+                        <div class="section-title-wrap">
+                            <div class="section-number-badge">3</div>
+                            <div>
+                                <h2 class="section-heading">Oferta al Administrador</h2>
+                                <p class="section-subheading">Volumen disponible para compra mayorista y costo unitario acordado</p>
+                            </div>
+                        </div>
+
+                        <div class="form-fields-grid-2">
+                            <div class="form-group-lux">
+                                <label for="cantidadOfertada" class="form-label-lux">
+                                    Cantidad a Vender al Admin <span class="req">*</span>
+                                </label>
+                                <div class="input-icon-container">
+                                    <i class="fas fa-boxes-stacked input-icon-lux"></i>
+                                    <input type="text" id="cantidadOfertada" th:field="*{cantidadOfertada}" class="form-control-lux with-icon" 
+                                           inputmode="numeric" data-max-fraction-digits="0" placeholder="0" required />
+                                </div>
+                                <span class="field-hint">Unidades ofrecidas para suministro inmediato.</span>
+                            </div>
+
+                            <div class="form-group-lux">
+                                <label for="costoProveedor" class="form-label-lux">
+                                    Costo de Venta al Admin (por unidad) <span class="req">*</span>
+                                </label>
+                                <div class="input-icon-container">
+                                    <span class="input-prefix-lux">COP $</span>
+                                    <input type="text" id="costoProveedor" th:field="*{costoProveedor}" class="form-control-lux with-prefix with-currency-prefix" 
+                                           inputmode="decimal" data-max-fraction-digits="2" placeholder="0" required />
+                                </div>
+                                <span class="field-hint">Monto unitario a pagar al proveedor por Softwell.</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group-lux">
+                            <label for="detallesVentaAdmin" class="form-label-lux">Detalles de la Venta al Admin</label>
+                            <textarea id="detallesVentaAdmin" th:field="*{detallesVentaAdmin}" class="form-control-lux textarea-lux" rows="3" 
+                                      placeholder="Indique detalles sobre la oferta, materiales, tiempos de despacho o garantías..."></textarea>
+                        </div>
+
+                        <!-- Interruptor moderno para marcar como destacado -->
+                        <div class="modern-switch-container">
+                            <label class="switch-toggle" for="destacado">
+                                <input type="checkbox" id="destacado" th:field="*{destacado}" class="switch-input" onchange="actualizarDestacado()" />
+                                <span class="switch-track">
+                                    <span class="switch-thumb"></span>
+                                </span>
+                            </label>
+                            <div class="switch-label-group">
+                                <label for="destacado" class="switch-main-label">Marcar como Destacado (solo para administradores)</label>
+                                <p class="switch-sub-label">Sugerir visibilidad preferente en el escaparate principal del catálogo.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- BOTONES EN LA PARTE INFERIOR DERECHA -->
+                    <div class="form-action-footer">
+                        <a th:href="@{/proveedor/productos}" class="btn-cancel-luxury">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn-submit-turquoise">
+                            <i class="fas fa-paper-plane"></i> Enviar Oferta
+                        </button>
+                    </div>
+
+                </div>
+            </main>
+        </form>
+
+    </div>
+
+    <!-- LÓGICA JAVASCRIPT Y SINCRONIZACIÓN EN TIEMPO REAL -->
+    <script>
+        const integerFormatterCO = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
+        const inputFormatterCO = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 2 });
+        const formatterCOP = new Intl.NumberFormat('es-CO', { 
+            style: 'currency', 
+            currency: 'COP', 
+            minimumFractionDigits: 0, 
+            maximumFractionDigits: 0 
+        });
+        function formatearCOP(valor) {
+            return 'COP ' + formatterCOP.format(valor);
+        }
+
+        function obtenerPartesNumero(valor, maxDecimales) {
+            const limpio = String(valor).replace(/[^\d,]/g, '');
+            const indiceDecimal = limpio.indexOf(',');
+            const tieneDecimal = maxDecimales > 0 && indiceDecimal >= 0;
+            const textoEntero = indiceDecimal >= 0 ? limpio.slice(0, indiceDecimal) : limpio;
+            let entero = textoEntero.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+            if (!entero && textoEntero.length > 0) {
+                entero = '0';
+            }
+
+            const decimal = tieneDecimal
+                ? limpio.slice(indiceDecimal + 1).replace(/\D/g, '').slice(0, maxDecimales)
+                : '';
+
+            return { entero, decimal, tieneDecimal };
+        }
+
+        function formatearBorradorNumero(valor, maxDecimales, conservarDecimalVacio) {
+            const partes = obtenerPartesNumero(valor, maxDecimales);
+            if (!partes.entero && !partes.tieneDecimal) {
+                return '';
+            }
+
+            const entero = partes.entero || '0';
+            const enteroFormateado = integerFormatterCO.format(Number(entero));
+            if (!partes.tieneDecimal) {
+                return enteroFormateado;
+            }
+            if (!partes.decimal && !conservarDecimalVacio) {
+                return enteroFormateado;
+            }
+            return `${enteroFormateado},${partes.decimal}`;
+        }
+
+        function obtenerPosicionCursor(valor, posicion) {
+            const prefijo = valor.slice(0, posicion);
+            const digitosAntes = (prefijo.match(/\d/g) || []).length;
+            const indiceComa = prefijo.indexOf(',');
+            const decimalesAntes = indiceComa >= 0
+                ? (prefijo.slice(indiceComa + 1).match(/\d/g) || []).length
+                : 0;
+            return { digitosAntes, tieneComaAntes: indiceComa >= 0, decimalesAntes };
+        }
+
+        function mapearPosicionCursor(valorFormateado, cursor) {
+            if (cursor.tieneComaAntes) {
+                const indiceComa = valorFormateado.indexOf(',');
+                if (indiceComa >= 0) {
+                    return Math.min(indiceComa + 1 + cursor.decimalesAntes, valorFormateado.length);
+                }
+            }
+
+            if (cursor.digitosAntes === 0) {
+                return 0;
+            }
+
+            let digitosVistos = 0;
+            for (let indice = 0; indice < valorFormateado.length; indice += 1) {
+                if (/\d/.test(valorFormateado[indice])) {
+                    digitosVistos += 1;
+                    if (digitosVistos === cursor.digitosAntes) {
+                        return indice + 1;
+                    }
+                }
+            }
+            return valorFormateado.length;
+        }
+
+        function formatearCampoNumerico(campo, finalizar = false) {
+            const maxDecimales = Number(campo.dataset.maxFractionDigits);
+            const posicionInicio = campo.selectionStart ?? campo.value.length;
+            const posicionFin = campo.selectionEnd ?? posicionInicio;
+            const cursorInicio = obtenerPosicionCursor(campo.value, posicionInicio);
+            const cursorFin = obtenerPosicionCursor(campo.value, posicionFin);
+            const valorFormateado = formatearBorradorNumero(campo.value, maxDecimales, !finalizar);
+            campo.value = valorFormateado;
+            campo.setSelectionRange(
+                mapearPosicionCursor(valorFormateado, cursorInicio),
+                mapearPosicionCursor(valorFormateado, cursorFin)
+            );
+        }
+
+        function leerNumeroLocalizado(campo) {
+            const partes = obtenerPartesNumero(campo.value, Number(campo.dataset.maxFractionDigits));
+            if (!partes.entero && !partes.tieneDecimal) {
+                return 0;
+            }
+            const valor = Number(`${partes.entero || '0'}${partes.decimal ? `.${partes.decimal}` : ''}`);
+            return Number.isFinite(valor) ? valor : 0;
+        }
+
+        function convertirAValorBackend(campo) {
+            const partes = obtenerPartesNumero(campo.value, Number(campo.dataset.maxFractionDigits));
+            if (!partes.entero && !partes.tieneDecimal) {
+                return '';
+            }
+            return `${partes.entero || '0'}${partes.decimal ? `.${partes.decimal}` : ''}`;
+        }
+
+        function inicializarCampoNumerico(campo) {
+            const valorInicial = campo.value.trim();
+            if (valorInicial) {
+                const numeroCanonico = Number(valorInicial);
+                if (Number.isFinite(numeroCanonico)) {
+                    campo.value = inputFormatterCO.format(numeroCanonico);
+                } else {
+                    campo.value = formatearBorradorNumero(
+                        valorInicial,
+                        Number(campo.dataset.maxFractionDigits),
+                        false
+                    );
+                }
+            }
+
+            campo.addEventListener('input', function() {
+                formatearCampoNumerico(campo);
+                calcularDesglose();
+            });
+            campo.addEventListener('blur', function() {
+                formatearCampoNumerico(campo, true);
+                calcularDesglose();
+            });
+        }
+
+        function calcularDesglose() {
+            const precioFinal = leerNumeroLocalizado(document.getElementById('precio'));
+            const costoAdmin = leerNumeroLocalizado(document.getElementById('costoProveedor'));
+            const ivaPorcentaje = leerNumeroLocalizado(document.getElementById('ivaPorcentaje'));
+            const cantidadOfertada = leerNumeroLocalizado(document.getElementById('cantidadOfertada'));
+            
+            const desgloseDiv = document.getElementById('desglosePrecios');
+
+            // Cálculos
+            const base = (precioFinal > 0 && ivaPorcentaje >= 0) ? (precioFinal / (1 + (ivaPorcentaje / 100))) : 0;
+            const iva = precioFinal - base;
+            const margen = base - costoAdmin;
+            const totalOferta = costoAdmin * cantidadOfertada;
+
+            // Actualización de Desglose en Formulario
+            if (precioFinal > 0) {
+                desgloseDiv.style.display = 'block';
+                document.getElementById('baseGravable').innerText = formatearCOP(base);
+                document.getElementById('ivaMonto').innerText = formatearCOP(iva);
+                document.getElementById('ivaLabel').innerText = `IVA Incluido (${ivaPorcentaje}%):`;
+                document.getElementById('margenComercial').innerText = formatearCOP(margen);
+            } else {
+                desgloseDiv.style.display = 'none';
+            }
+
+            // Actualización en la Tarjeta Turquesa (Vista Previa en Vivo)
+            document.getElementById('preview-precio-display').innerText = formatearCOP(precioFinal);
+            document.getElementById('preview-base-display').innerText = formatearCOP(base);
+            document.getElementById('preview-iva-display').innerText = formatearCOP(iva);
+            const previewIvaLabelCard = document.getElementById('preview-iva-label-card');
+            if (previewIvaLabelCard) {
+                previewIvaLabelCard.innerText = `IVA Aplicado (${ivaPorcentaje}%):`;
+            }
+            document.getElementById('preview-total-oferta').innerText = formatearCOP(totalOferta);
+        }
+
+        function sincronizarCamposTexto() {
+            // Nombre de la joya
+            const nombreVal = document.getElementById('nombre').value.trim();
+            document.getElementById('preview-nombre').innerText = nombreVal !== '' ? nombreVal : 'Nombre de la Joya';
+
+            // Categoría
+            const catSelect = document.getElementById('categoria');
+            const catVal = catSelect.options[catSelect.selectedIndex]?.value || '';
+            document.getElementById('preview-categoria').innerText = catVal !== '' ? catVal : 'Categoría';
+        }
+
+        function actualizarDestacado() {
+            const check = document.getElementById('destacado');
+            const badge = document.getElementById('preview-destacado-badge');
+            if (badge) {
+                badge.style.display = check.checked ? 'inline-flex' : 'none';
+            }
+        }
+
+        // Manejo de carga de imagen con vista previa y Drag & Drop
+        const fileInput = document.getElementById('imagenArchivo');
+        const dropzoneArea = document.getElementById('dropzoneArea');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+        const imageLoadedWrapper = document.getElementById('imageLoadedWrapper');
+        const previewImg = document.getElementById('joya-preview');
+
+        function mostrarImagen(file) {
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    uploadPlaceholder.style.display = 'none';
+                    imageLoadedWrapper.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    mostrarImagen(file);
+                }
+            });
+        }
+
+        // Drag & Drop
+        if (dropzoneArea) {
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzoneArea.addEventListener(eventName, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzoneArea.classList.add('drag-over');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzoneArea.addEventListener(eventName, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzoneArea.classList.remove('drag-over');
+                }, false);
+            });
+
+            dropzoneArea.addEventListener('drop', function(e) {
+                const dt = e.dataTransfer;
+                const file = dt.files[0];
+                if (file) {
+                    fileInput.files = dt.files;
+                    mostrarImagen(file);
+                }
+            }, false);
+        }
+
+        // Asignación de listeners en tiempo real
+        document.getElementById('nombre').addEventListener('input', sincronizarCamposTexto);
+        document.getElementById('categoria').addEventListener('change', sincronizarCamposTexto);
+        document.getElementById('destacado').addEventListener('change', actualizarDestacado);
+        const camposNumericos = ['precio', 'ivaPorcentaje', 'cantidadOfertada', 'costoProveedor']
+            .map(id => document.getElementById(id));
+        camposNumericos.forEach(inicializarCampoNumerico);
+        document.getElementById('jewelForm').addEventListener('submit', function() {
+            ['precio', 'cantidadOfertada', 'costoProveedor'].forEach(id => {
+                const campo = document.getElementById(id);
+                campo.value = convertirAValorBackend(campo);
+            });
+        });
+
+        // Al cargar la ventana (soporte para modo edición y datos iniciales)
+        window.addEventListener('DOMContentLoaded', function() {
+            calcularDesglose();
+            sincronizarCamposTexto();
+            actualizarDestacado();
+
+            // Si ya existe una imagen cargada previamente (en modo edición)
+            if (previewImg && previewImg.getAttribute('src') && previewImg.getAttribute('src').trim() !== '') {
+                uploadPlaceholder.style.display = 'none';
+                imageLoadedWrapper.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

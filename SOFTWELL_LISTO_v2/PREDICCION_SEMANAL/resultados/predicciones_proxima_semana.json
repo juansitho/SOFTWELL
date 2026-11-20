@@ -1,0 +1,167 @@
+{
+  "modelo": "Random Forest",
+  "origen_datos": "simulado",
+  "semana_inicio": "2026-11-02",
+  "predicciones": [
+    {
+      "producto": "Aretes Argolla Oro",
+      "categoria": "Aretes",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 8.2,
+      "stock_actual": 37,
+      "unidades_a_reponer": 0,
+      "alerta": "OK"
+    },
+    {
+      "producto": "Pulsera Charms",
+      "categoria": "Pulseras",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 4.6,
+      "stock_actual": 7,
+      "unidades_a_reponer": 0,
+      "alerta": "OK"
+    },
+    {
+      "producto": "Collar Corazón",
+      "categoria": "Collares",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 4.4,
+      "stock_actual": 26,
+      "unidades_a_reponer": 0,
+      "alerta": "OK"
+    },
+    {
+      "producto": "Anillo Corazón Rosa",
+      "categoria": "Anillos",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 3.2,
+      "stock_actual": 39,
+      "unidades_a_reponer": 0,
+      "alerta": "REVISAR: posible exceso de inventario"
+    },
+    {
+      "producto": "Aretes Perla",
+      "categoria": "Aretes",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 3.1,
+      "stock_actual": 37,
+      "unidades_a_reponer": 0,
+      "alerta": "REVISAR: posible exceso de inventario"
+    },
+    {
+      "producto": "Aretes Gota Cristal",
+      "categoria": "Aretes",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 3.0,
+      "stock_actual": 22,
+      "unidades_a_reponer": 0,
+      "alerta": "OK"
+    },
+    {
+      "producto": "Collar Brillante",
+      "categoria": "Collares",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 2.6,
+      "stock_actual": 5,
+      "unidades_a_reponer": 0,
+      "alerta": "OK"
+    },
+    {
+      "producto": "Pulsera Rosa",
+      "categoria": "Pulseras",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 2.0,
+      "stock_actual": 27,
+      "unidades_a_reponer": 0,
+      "alerta": "REVISAR: posible exceso de inventario"
+    },
+    {
+      "producto": "Pulsera Tennis",
+      "categoria": "Pulseras",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 2.0,
+      "stock_actual": 33,
+      "unidades_a_reponer": 0,
+      "alerta": "REVISAR: posible exceso de inventario"
+    },
+    {
+      "producto": "Collar Perla",
+      "categoria": "Collares",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 1.9,
+      "stock_actual": 7,
+      "unidades_a_reponer": 0,
+      "alerta": "OK"
+    },
+    {
+      "producto": "Anillo Blanco",
+      "categoria": "Anillos",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 1.9,
+      "stock_actual": 31,
+      "unidades_a_reponer": 0,
+      "alerta": "REVISAR: posible exceso de inventario"
+    },
+    {
+      "producto": "Collar Diamante",
+      "categoria": "Collares",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 1.8,
+      "stock_actual": 6,
+      "unidades_a_reponer": 0,
+      "alerta": "OK"
+    },
+    {
+      "producto": "Pulsera Hilo Dorado",
+      "categoria": "Pulseras",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 1.7,
+      "stock_actual": 13,
+      "unidades_a_reponer": 0,
+      "alerta": "OK"
+    },
+    {
+      "producto": "Anillo Estrellas",
+      "categoria": "Anillos",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 1.6,
+      "stock_actual": 33,
+      "unidades_a_reponer": 0,
+      "alerta": "REVISAR: posible exceso de inventario"
+    },
+    {
+      "producto": "Aretes Blanco",
+      "categoria": "Aretes",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 1.5,
+      "stock_actual": 31,
+      "unidades_a_reponer": 0,
+      "alerta": "REVISAR: posible exceso de inventario"
+    },
+    {
+      "producto": "Anillo Solitario Oro Blanco",
+      "categoria": "Anillos",
+      "semana_inicio": 1793577600000,
+      "semana_fin": 1794096000000,
+      "demanda_estimada": 1.2,
+      "stock_actual": 10,
+      "unidades_a_reponer": 0,
+      "alerta": "REVISAR: posible exceso de inventario"
+    }
+  ]
+}

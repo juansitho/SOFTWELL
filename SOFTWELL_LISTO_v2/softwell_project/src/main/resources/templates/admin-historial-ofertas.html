@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon-32.ico}">
+    <meta charset="UTF-8">
+    <title>Historial de Ofertas - Administración</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        .status-accepted { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status-rejected { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .section-title {
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            color: #2c3e50;
+        }
+        .table-img {
+            width: 50px; height: 50px; object-fit: cover; border-radius: 8px;
+            border: 1px solid #eee;
+        }
+    </style>
+</head>
+<body class="admin-app">
+<div class="admin-container">
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar}"></aside>
+
+    <main class="main-content admin-main-content">
+        <header class="admin-header">
+            <h1>Historial de Ofertas</h1>
+        </header>
+        <section class="content-section active">
+            <div class="container">
+
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <h2 class="section-title"><i class="fas fa-check-circle" style="color: #27ae60;"></i> Ofertas Aceptadas</h2>
+        <div th:if="${#lists.isEmpty(acceptedOffers)}" class="alert alert-info text-center">
+            <i class="fas fa-info-circle"></i> No hay ofertas aceptadas en el historial.
+        </div>
+        
+        <div th:if="${not #lists.isEmpty(acceptedOffers)}" class="table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Cantidad (Stock Prov)</th>
+                        <th>Proveedor</th>
+                        <th>Fecha de decisión</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="oferta : ${acceptedOffers}">
+                        <td>
+                            <img th:src="${(oferta.imagen != null and oferta.imagen != '') ? oferta.imagen : '/img/placeholder.webp'}" class="table-img">
+                        </td>
+                        <td th:text="${oferta.nombre}" style="font-weight: 600;"></td>
+                        <td th:text="'COP $ ' + ${#numbers.formatDecimal(oferta.precio, 1, 'POINT', 0, 'COMMA')}" style="color: #2e7d32; font-weight: 600;"></td>
+                        <td th:text="${oferta.stockProveedor}"></td>
+                        <td th:text="${oferta.proveedor != null ? oferta.proveedor.nombre : 'N/A'}"></td>
+                        <td th:text="${oferta.fechaDecisionAdmin != null ? #temporals.format(oferta.fechaDecisionAdmin, 'dd/MM/yyyy HH:mm') : (oferta.fechaOferta != null ? #temporals.format(oferta.fechaOferta, 'dd/MM/yyyy HH:mm') : 'N/A')}"></td>
+                        <td><span class="status-badge status-accepted">Aceptada</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2 class="section-title" style="margin-top: 60px;"><i class="fas fa-times-circle" style="color: #c0392b;"></i> Ofertas Rechazadas</h2>
+        <div th:if="${#lists.isEmpty(rejectedOffers)}" class="alert alert-info text-center">
+            <i class="fas fa-info-circle"></i> No hay ofertas rechazadas en el historial.
+        </div>
+        
+        <div th:if="${not #lists.isEmpty(rejectedOffers)}" class="table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Imagen</th>
+                        <th>Nombre</th>
+                        <th>Proveedor</th>
+                        <th>Precio Sugerido</th>
+                        <th>Cant. Ofertada</th>
+                        <th>Fecha de decisión</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="oferta : ${rejectedOffers}">
+                        <td th:text="${oferta.id}"></td>
+                        <td>
+                            <img th:src="${(oferta.imagen != null and oferta.imagen != '') ? oferta.imagen : '/img/placeholder.webp'}" class="table-img">
+                        </td>
+                        <td th:text="${oferta.nombre}" style="font-weight: 600;"></td>
+                        <td th:text="${oferta.proveedor != null ? oferta.proveedor.nombre : 'N/A'}"></td>
+                        <td th:text="'COP $ ' + ${#numbers.formatDecimal(oferta.precio, 1, 'POINT', 0, 'COMMA')}"></td>
+                        <td th:text="${oferta.cantidadOfertada}"></td>
+                        <td th:text="${oferta.fechaDecisionAdmin != null ? #temporals.format(oferta.fechaDecisionAdmin, 'dd/MM/yyyy HH:mm') : (oferta.fechaOferta != null ? #temporals.format(oferta.fechaOferta, 'dd/MM/yyyy HH:mm') : 'N/A')}"></td>
+                        <td><span class="status-badge status-rejected">Rechazada</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-center mt-5 mb-5">
+            <a th:href="@{/admin}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver al Panel Admin</a>
+        </div>
+    </div>
+</body>
+</html>

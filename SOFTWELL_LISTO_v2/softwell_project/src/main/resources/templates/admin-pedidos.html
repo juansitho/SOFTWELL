@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon-32.ico}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Pedidos - Admin</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="admin-app">
+
+<div class="admin-container">
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar}"></aside>
+
+    <main class="main-content admin-main-content">
+        <header class="admin-header">
+            <h1>Gestión de Pedidos</h1>
+        </header>
+
+        <section class="content-section active">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Todos los Pedidos</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="admin-table" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>ID Pedido</th>
+                                    <th>Fotos</th>
+                                    <th>Cliente</th>
+                                    <th>Email</th>
+                                    <th>Fecha</th>
+                                    <th>Total</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="pedido : ${pedidos}">
+                                    <td th:text="${#strings.substring(pedido.id, 0, pedido.id.length() > 7 ? 7 : pedido.id.length())}">1</td>
+                                    <td>
+                                        <div style="display: flex; gap: 4px;">
+                                            <img th:each="imgUrl : ${#strings.arraySplit(pedido.imagenesItems, ',')}" 
+                                                 th:src="${imgUrl}" 
+                                                 style="width: 65px; height: 65px; object-fit: cover; border-radius: 3px; border: 1px solid #eee;"
+                                                 onerror="this.src='/img/placeholder.webp'">
+                                        </div>
+                                    </td>
+                                    <td th:text="${pedido.nombreCliente}">Nombre Cliente</td>
+                                    <td th:text="${pedido.emailCliente}"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4c29212d25200c2f202529223829622f2321">[email&#160;protected]</a></td>
+                                    <td th:text="${#temporals.format(pedido.fechaCreacion, 'dd-MM-yyyy HH:mm')}">01-01-2025</td>
+                                    <td th:text="'COP $ ' + ${#numbers.formatDecimal(pedido.totalActualizado, 1, 'POINT', 0, 'COMMA')}">COP $ 100</td>
+                                    <td>
+                                        <a th:href="@{/admin/pedidos/{id}(id=${pedido.id})}" class="btn btn-info btn-sm" title="Ver Detalle" aria-label="Ver detalle del pedido">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(pedidos)}">
+                                    <td colspan="6" class="text-center">No hay pedidos registrados.</td>
+                                </tr>
+                            </tbody>
+                        </table>

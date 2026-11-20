@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon-32.ico}">
+    <meta charset="UTF-8">
+    <title th:text="${producto.id == null ? 'Agregar Nueva Joya' : 'Editar Joya'}"></title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .product-form-page {
+            width: min(100%, 1120px);
+            margin: 0 auto;
+            padding: 24px clamp(16px, 3vw, 36px) 40px;
+            box-sizing: border-box;
+        }
+
+        .product-form-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .product-form-header h1 {
+            margin: 0;
+            color: var(--admin-green-text, #145451);
+        }
+
+        .product-form-back {
+            display: inline-flex;
+            flex: 0 0 auto;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            min-height: 42px;
+            padding: 10px 16px;
+            border: 1px solid var(--admin-green-border, #B8E8E3);
+            border-radius: 10px;
+            color: var(--admin-green-text, #145451);
+            background: #fff;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background-color .18s ease, transform .18s ease;
+        }
+
+        .product-form-back:hover {
+            color: var(--admin-green-text, #145451);
+            background: var(--admin-green-soft, #E5F6F4);
+            transform: translateY(-1px);
+        }
+
+        .product-form-card {
+            min-width: 0;
+            padding: clamp(18px, 3vw, 32px);
+        }
+
+        .product-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-items: start;
+            gap: 20px;
+            min-width: 0;
+        }
+
+        .product-form-grid > * {
+            min-width: 0;
+        }
+
+        .product-form-grid .form-group {
+            margin: 0;
+        }
+
+        .product-form-grid .form-group input,
+        .product-form-grid .form-group select,
+        .product-form-grid .form-group textarea {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        .product-form-preview,
+        .product-form-wide {
+            grid-column: 1 / -1;
+        }
+
+        .product-form-preview {
+            display: grid;
+            justify-items: center;
+            gap: 10px;
+            margin: 0;
+            padding: 18px;
+            border: 1px solid var(--admin-green-border, #B8E8E3);
+            border-radius: 14px;
+            background: #F7FBFA;
+        }
+
+        .product-form-preview img {
+            display: block;
+            width: min(100%, 220px);
+            height: 190px;
+            object-fit: contain;
+            border: 1px solid #DCEBE8;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .product-form-preview p {
+            margin: 0;
+        }
+
+        .product-form-image-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .product-form-image-controls input {
+            flex: 1 1 240px;
+        }
+
+        .product-form-image-help {
+            display: block;
+            margin-top: 8px;
+        }
+
+        .product-form-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .product-form-check input {
+            flex: 0 0 auto;
+            width: auto;
+            margin: 0;
+        }
+
+        .product-form-actions {
+            display: flex;
+            justify-content: flex-start;
+            padding-top: 4px;
+        }
+
+        .product-form-actions .btn {
+            min-height: 44px;
+            padding: 11px 20px;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 700px) {
+            .product-form-page {
+                padding: 18px 14px 28px;
+            }
+
+            .product-form-header {
+                align-items: flex-start;
+                flex-direction: column-reverse;
+            }
+
+            .product-form-grid {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 16px;
+            }
+
+            .product-form-preview,
+            .product-form-wide {
+                grid-column: 1;
+            }
+
+            .product-form-image-controls {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .product-form-image-controls input {
+                flex-basis: auto;
+            }
+        }
+    </style>
+</head>
+<body class="admin-app">
+    <div class="admin-container">
+        <aside th:replace="~{fragments/admin-sidebar :: sidebar}"></aside>
+        <main class="admin-main-content">
+    <div class="container product-form-page">
+        <div class="product-form-header">
+            <h1 th:text="${producto.id == null ? 'Agregar Nueva Joya' : 'Editar Joya'}"></h1>
+            <a th:href="@{/admin/productos}" class="product-form-back">
+                <i class="fas fa-arrow-left"></i> Regresar
+            </a>
+        </div>
+
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Notificación de campos bloqueados -->
+        <div th:if="${producto.proveedor != null}" class="alert alert-info py-2 mb-3" style="background-color: #e3f2fd; color: #0d47a1; border-left: 5px solid #2196f3; padding: 15px; border-radius: 8px;">
+            <i class="fas fa-lock"></i> <strong>Stock protegido:</strong>
+            Esta joya proviene de un proveedor. La cantidad no puede modificarse; el precio al público sí puede ajustarse.
+        </div>
+
+        <div class="card p-4 shadow-sm product-form-card">
+            <!-- A. Configurar el formulario con multipart/form-data -->
+            <form th:action="@{/admin/productos/guardar}" th:object="${producto}" method="post" enctype="multipart/form-data" class="form-horizontal product-form-grid">
+                <input type="hidden" th:field="*{id}" />
+
+                <!-- B. Vista previa dinámica (Reemplaza el antiguo campo URL) -->
+                <div class="product-preview-container product-form-preview">
+                    <img id="joya-preview" th:src="${(producto.imagen != null and producto.imagen != '') ? producto.imagen : '/img/placeholder.webp'}"
+                         alt="Vista previa">
+                    <p class="text-muted mt-2">Imagen actual de la joya</p>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="nombre">Nombre de la Joya:</label>
+                    <input type="text" id="nombre" th:field="*{nombre}" class="form-control" required />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="categoria">Categoría:</label>
+                    <select id="categoria" th:field="*{categoria}" class="form-control" required>
+                        <option value="">Seleccione...</option>
+                        <option value="Anillos">Anillos</option>
+                        <option value="Collares">Collares</option>
+                        <option value="Pulseras">Pulseras</option>
+                        <option value="Aretes">Aretes</option>
+                        <option value="Cadenas">Cadenas</option>
+                        <option value="Dijes">Dijes</option>
+                        <option value="Tobilleras">Tobilleras</option>
+                        <option value="Relojes">Relojes</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="proveedor">Proveedor:</label>
+                    <!-- Campo hidden para preservar el proveedor cuando el select está disabled -->
+                    <input type="hidden" th:if="${producto.proveedor != null}" name="proveedor" th:value="${producto.proveedor.id}" />
+                    <select id="proveedor" th:field="*{proveedor}" class="form-control"
+                            th:disabled="${producto.proveedor != null}"
+                            th:style="${producto.proveedor != null ? 'background-color: #f8f9fa; cursor: not-allowed; border-color: #ddd;' : ''}">
+                        <option value="">Sin proveedor (producto propio)</option>
+                        <option th:each="prov : ${proveedores}" th:value="${prov.id}" th:text="${prov.nombre}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="precio">Precio de Venta al Público (PVP, COP):</label>
+                    <input type="text" id="precio" class="form-control" inputmode="decimal" autocomplete="off" required
+                           th:value="${producto.precio == 0 ? '0' : producto.precio}" />
+                    <input type="hidden" id="precio-valor" th:field="*{precio}" />
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="stock">Stock disponible:</label>
+                    <input type="number" id="stock" th:field="*{stock}" class="form-control" min="0" required 
+                           th:readonly="${producto.proveedor != null}" th:style="${producto.proveedor != null ? 'background-color: #f8f9fa; cursor: not-allowed; border-color: #ddd;' : ''}" />
+                </div>
+
+                <!-- Selector local de archivos y botón de eliminar -->
+                <div class="form-group mb-3 product-form-wide">
+                    <label for="imagenArchivo">Seleccionar Imagen:</label>
+                    <div class="product-form-image-controls">
+                        <input type="file" id="imagenArchivo" name="imagenArchivo" class="form-control" accept="image/*" style="flex: 1;" />
+                        <button type="button" id="btn-eliminar-foto-producto" class="btn" style="background: #fff0f0; color: #d9534f; border: 1px solid #d9534f; padding: 10px 15px;" th:if="${producto.id != null and producto.imagen != null and producto.imagen != ''}">
+                            <i class="fas fa-trash-alt"></i> Eliminar Foto
+                        </button>
+                    </div>
+                    <small class="text-muted product-form-image-help">Formatos permitidos: JPG, PNG, WebP.</small>
+                </div>
+
+                <div class="form-group mb-3 product-form-wide">
+                    <label for="descripcion">Descripción detallada:</label>
+                    <textarea id="descripcion" th:field="*{descripcion}" class="form-control" rows="5"></textarea>
+                </div>
+
+                <div class="form-group form-check mb-3 product-form-wide product-form-check">
+                    <input type="checkbox" id="destacado" th:field="*{destacado}" class="form-check-input" />
+                    <label class="form-check-label" for="destacado">Marcar como joya destacada</label>
+                </div>
+
+                <div class="form-group mt-4 product-form-wide product-form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Producto
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Formulario oculto para eliminar foto vía POST -->
+        <form id="form-eliminar-foto-producto" th:if="${producto.id != null}" th:action="@{/admin/productos/eliminar-foto/{id}(id=${producto.id})}" method="POST" style="display: none;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        </form>
+    </div>
+
+    <script>
+        const precioVisible = document.getElementById('precio');
+        const precioValor = document.getElementById('precio-valor');
+        const formatoPrecio = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 2 });
+
+        function normalizarPrecio(valor) {
+            const texto = valor.replace(/[^\d,]/g, '');
+            const separadorDecimal = texto.indexOf(',');
+            let parteEntera = (separadorDecimal < 0 ? texto : texto.slice(0, separadorDecimal))
+                .replace(/\D/g, '')
+                .replace(/^0+(?=\d)/, '');
+            const parteDecimal = separadorDecimal < 0
+                ? null
+                : texto.slice(separadorDecimal + 1).replace(/\D/g, '').slice(0, 2);
+
+            if (!parteEntera) parteEntera = '0';
+            return parteEntera.replace(/\B(?=(\d{3})+(?!\d))/g, '.') +
+                (parteDecimal === null ? '' : ',' + parteDecimal);
+        }
+
+        function actualizarPrecio() {
+            const valor = precioVisible.value.replace(/\./g, '').replace(',', '.');
+            precioValor.value = valor || '0';
+        }
+
+        precioVisible.value = formatoPrecio.format(Number(precioValor.value) || 0);
+        precioVisible.addEventListener('input', function() {
+            const posicion = precioVisible.selectionStart;
+            const textoAntes = precioVisible.value.slice(0, posicion);
+            const digitosAntes = textoAntes.replace(/\D/g, '').length;
+            const comaAntes = textoAntes.includes(',');
+            const decimalesAntes = comaAntes
+                ? textoAntes.split(',')[1].replace(/\D/g, '').length
+                : 0;
+            precioVisible.value = normalizarPrecio(precioVisible.value);
+
+            let nuevaPosicion = 0;
+            let digitosContados = 0;
+            while (nuevaPosicion < precioVisible.value.length && digitosContados < digitosAntes) {
+                if (/\d/.test(precioVisible.value[nuevaPosicion])) digitosContados++;
+                nuevaPosicion++;
+            }
+            if (comaAntes && precioVisible.value[nuevaPosicion] === ',') {
+                nuevaPosicion++;
+                let decimalesContados = 0;
+                while (nuevaPosicion < precioVisible.value.length && decimalesContados < decimalesAntes) {
+                    if (/\d/.test(precioVisible.value[nuevaPosicion])) decimalesContados++;
+                    nuevaPosicion++;
+                }
+            }
+            precioVisible.setSelectionRange(nuevaPosicion, nuevaPosicion);
+            actualizarPrecio();
+        });
+        precioVisible.form.addEventListener('submit', actualizarPrecio);
+
+        // Lógica para previsualizar la imagen antes de subirla
+        document.getElementById('imagenArchivo').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('joya-preview').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Manejo del botón de eliminar foto
+        const btnEliminar = document.getElementById('btn-eliminar-foto-producto');
+        if (btnEliminar) {
+            btnEliminar.addEventListener('click', function() {
+                if (confirm('¿Estás seguro de que deseas eliminar la imagen actual?')) {
+                    document.getElementById('form-eliminar-foto-producto').submit();
+                }
+            });
+        }
+    </script>
+        </main>
+    </div>
+</body>
+</html>

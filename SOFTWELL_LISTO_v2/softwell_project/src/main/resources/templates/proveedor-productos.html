@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon-32.ico}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis ofertas | Softwell Joyería</title>
+    
+    <!-- Tipografías de alta gama: Cormorant Garamond para títulos y Figtree para textos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconos FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-general: #F4F2F7;
+            --surface-white: #FFFFFF;
+            --field-bg: #FAF9FC;
+            --text-main: #1F1528;
+            --text-muted: #6A5F76;
+            --border-subtle: #E5E0EC;
+            --purple-accent: #5B2A86;
+            --turquoise: #00B4B6;
+            --turquoise-light: #55D6C8;
+            --turquoise-dark: #008F91;
+            --turquoise-soft: #D9F4F1;
+            --turquoise-border: #B8E8E3;
+            --turquoise-shadow: rgba(0, 180, 182, 0.28);
+            --green-accepted-bg: #D9F2E3;
+            --green-accepted-text: #12633A;
+            --red-rejected-bg: #FBDDE1;
+            --red-rejected-text: #8C1D2C;
+            --pending-bg: var(--turquoise-soft);
+            --pending-text: #12635E;
+            --radius-card: 24px;
+            --radius-stat: 18px;
+            --radius-pill: 14px;
+        }
+
+        /* 1. FONDO Y CONTENEDOR PRINCIPAL */
+        body {
+            background-color: var(--bg-general);
+            background-image: 
+                radial-gradient(circle at 92% 8%, rgba(85, 214, 200, 0.22) 0%, rgba(0, 180, 182, 0.08) 35%, transparent 65%),
+                radial-gradient(circle at 8% 8%, rgba(0, 180, 182, 0.18) 0%, rgba(0, 180, 182, 0.04) 40%, transparent 65%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: 'Figtree', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .offers-container {
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            padding: 36px clamp(24px, 3.2vw, 44px) 80px clamp(24px, 3.2vw, 44px);
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            box-sizing: border-box;
+        }
+
+        /* Mensajes de notificación */
+        .lux-alert {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            border-radius: var(--radius-pill);
+            font-size: 14.5px;
+            font-weight: 500;
+            animation: fadeIn 200ms ease;
+        }
+        .lux-alert-success {
+            background: var(--green-accepted-bg);
+            color: var(--green-accepted-text);
+            border: 1px solid #C3E9D2;
+        }
+        .lux-alert-error {
+            background: var(--red-rejected-bg);
+            color: var(--red-rejected-text);
+            border: 1px solid #F6CCD3;
+        }
+
+        /* 2. ENCABEZADO SUPERIOR */
+        .offers-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .header-titles {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .main-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 48px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin: 0;
+            line-height: 1.1;
+            letter-spacing: -0.5px;
+        }
+
+        .main-description {
+            font-family: 'Figtree', sans-serif;
+            font-size: 15px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Botón "+ Nueva joya" */
+        .btn-new-jewel {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, var(--turquoise-light) 0%, var(--turquoise) 50%, var(--turquoise-dark) 100%);
+            color: var(--text-main);
+            font-family: 'Figtree', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            padding: 13px 24px;
+            border-radius: var(--radius-pill);
+            text-decoration: none;
+            box-shadow: 0 6px 18px var(--turquoise-shadow);
+            transition: all 150ms ease;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-new-jewel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(0, 143, 145, 0.4);
+            color: var(--text-main);
+        }
+
+        .btn-new-jewel:active {
+            transform: translateY(0);
+        }
+
+        /* 3. TARJETAS DE ESTADÍSTICAS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .stat-card {
+            background: var(--surface-white);
+            border-radius: var(--radius-stat);
+            border: 1px solid var(--border-subtle);
+            padding: 20px 22px;
+            box-shadow: 0 4px 14px rgba(31, 21, 40, 0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 150ms ease, box-shadow 150ms ease;
+            box-sizing: border-box;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(31, 21, 40, 0.06);
+        }
+
+        /* Tarjeta 1: Turquesa */
+        .stat-card-turquoise {
+            background: var(--turquoise) !important;
+            border-color: #00A1A3 !important;
+            box-shadow: 0 6px 20px rgba(0, 180, 182, 0.28) !important;
+        }
+
+        .stat-card-turquoise .stat-title {
+            color: rgba(31, 21, 40, 0.85) !important;
+        }
+
+        .stat-card-turquoise .stat-number {
+            color: var(--text-main) !important;
+        }
+
+        .stat-card-turquoise .stat-icon-wrap {
+            background: rgba(255, 255, 255, 0.26);
+            border-color: rgba(255, 255, 255, 0.35);
+            color: var(--text-main);
+        }
+
+        .stat-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-title {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .stat-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 35px;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1;
+        }
+
+        .stat-icon-wrap {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--field-bg);
+            border: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .stat-icon-green {
+            background: var(--green-accepted-bg);
+            border-color: #C3E9D2;
+            color: var(--green-accepted-text);
+        }
+
+        .stat-icon-red {
+            background: var(--red-rejected-bg);
+            border-color: #F6CCD3;
+            color: var(--red-rejected-text);
+        }
+
+        .stat-icon-turquoise {
+            background: var(--turquoise-soft);
+            border-color: var(--turquoise-border);
+            color: #12635E;
+        }
+
+        /* 4. BARRA DE FILTROS Y BUSCADOR */
+        .toolbar-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Botones de filtro agrupados */
+        .filter-group-container {
+            background: var(--surface-white);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-pill);
+            padding: 4px;
+            display: inline-flex;
+            gap: 4px;
+            box-shadow: 0 2px 8px rgba(31, 21, 40, 0.02);
+        }
+
+        .filter-pill-btn {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Figtree', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 150ms ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-pill-btn:hover:not(.active) {
+            background: var(--field-bg);
+            color: var(--text-main);
+        }
+
+        .filter-pill-btn.active {
+            background: linear-gradient(135deg, var(--turquoise-light) 0%, var(--turquoise) 100%);
+            color: var(--text-main);
+            font-weight: 700;
+            box-shadow: 0 3px 10px var(--turquoise-shadow);
+        }
+
+        .pill-count {
+            font-size: 12px;
+            padding: 2px 7px;
+            border-radius: 12px;
+            background: rgba(31, 21, 40, 0.08);
+            font-weight: 700;
+        }
+
+        .filter-pill-btn.active .pill-count {
+            background: rgba(31, 21, 40, 0.16);
+        }
+
+        /* Buscador a la derecha (320px) */
+        .search-box-container {
+            position: relative;
+            width: 320px;
+        }
+
+        .search-icon-turquoise {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--turquoise-dark);
+            font-size: 15px;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--surface-white);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-pill);
+            padding: 11px 38px 11px 42px;
+            font-family: 'Figtree', sans-serif;
+            font-size: 14px;
+            color: var(--text-main);
+            box-sizing: border-box;
+            transition: all 150ms ease;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--turquoise);
+            box-shadow: 0 0 0 3px rgba(0, 180, 182, 0.16);
+        }
+
+        .search-clear-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px;
+        }
+
+        .search-clear-btn:hover {
+            color: var(--text-main);
+        }
+
+        /* 5. TABLA PRINCIPAL DE OFERTAS */
+        .table-card-container {
+            background: var(--surface-white);
+            border-radius: var(--radius-card);
+            border: 1px solid var(--border-subtle);
+            box-shadow: 0 14px 35px rgba(31, 21, 40, 0.04), 0 2px 8px rgba(31, 21, 40, 0.02);
+            overflow: hidden;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .table-responsive-wrapper {
+            overflow-x: auto;
+            overflow-y: hidden;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #D1C7DA #FAF9FC;
+        }
+
+        .table-responsive-wrapper::-webkit-scrollbar {
+            height: 7px;
+        }
+
+        .table-responsive-wrapper::-webkit-scrollbar-track {
+            background: #FAF9FC;
+            border-radius: 4px;
+        }
+
+        .table-responsive-wrapper::-webkit-scrollbar-thumb {
+            background: #D1C7DA;
+            border-radius: 4px;
+        }
+
+        .table-responsive-wrapper::-webkit-scrollbar-thumb:hover {
+            background: var(--turquoise);
+        }
+
+        .lux-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            table-layout: auto;
+        }
+
+        /* Encabezados de la tabla */
+        .lux-table thead th {
+            background: var(--field-bg);
+            color: var(--text-muted);
+            font-size: 11.5px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 16px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+            white-space: nowrap;
+            text-align: center !important;
+        }
+
+        .lux-table tbody td:first-child {
+            padding-left: 28px;
+        }
+
+        .lux-table tbody td:last-child {
+            padding-right: 28px;
+            text-align: center;
+        }
+
+        /* Distribución proporcional de las 6 columnas */
+        .th-joya, .col-joya {
+            width: 32%;
+        }
+
+        .th-costo, .col-costo {
+            width: 14%;
+            white-space: nowrap;
+        }
+
+        .th-precio {
+            width: 14%;
+            white-space: nowrap;
+            text-align: center !important;
+        }
+
+        .col-precio {
+            width: 14%;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .th-stock, .col-stock {
+            width: 18%;
+        }
+
+        .th-estado, .col-estado {
+            width: 11%;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .th-acciones, .col-acciones {
+            width: 11%;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        /* Filas e interacciones (150ms) */
+        .lux-table tbody tr {
+            border-bottom: 1px solid #F0ECF5;
+            transition: background-color 150ms ease;
+        }
+
+        .lux-table tbody tr:hover {
+            background-color: rgba(0, 180, 182, 0.04);
+        }
+
+        .lux-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .lux-table td {
+            padding: 14px 12px;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        /* Columna 1: JOYA */
+        .joya-item-flex {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .joya-photo {
+            width: 52px;
+            height: 52px;
+            border-radius: 13px;
+            object-fit: cover;
+            border: 1px solid var(--border-subtle);
+            flex-shrink: 0;
+            background: var(--field-bg);
+        }
+
+        .joya-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .joya-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        .joya-category-pill {
+            background: var(--bg-general);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 11.5px;
+            color: var(--purple-accent);
+            font-weight: 600;
+        }
+
+        /* Columna 2 y 3: COSTO y PRECIO */
+        .col-costo .price-val {
+            font-variant-numeric: tabular-nums;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .col-precio {
+            text-align: right;
+        }
+
+        .col-precio .price-val {
+            font-variant-numeric: tabular-nums;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Columna 4: STOCK / OFERTA */
+        .stock-accepted-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .stock-number-big {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1;
+        }
+
+        .stock-unit-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .stock-rejected-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 100%;
+            max-width: 240px;
+        }
+
+        .unidades-no-tomadas {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--red-rejected-text);
+        }
+
+        .progress-bar-track {
+            width: 100%;
+            height: 7px;
+            background: #EFEAF4;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--turquoise-light) 0%, var(--turquoise) 55%, var(--turquoise-dark) 100%);
+            border-radius: 10px;
+            transition: width 300ms ease;
+        }
+
+        .progress-bar-caption {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .stock-pending-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        /* Columna 5: ESTADO */
+        .badge-pill-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .status-pill-accepted {
+            background: var(--green-accepted-bg);
+            color: var(--green-accepted-text);
+        }
+
+        .dot-indicator {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .dot-green {
+            background: var(--green-accepted-text);
+        }
+
+        .status-pill-rejected {
+            background: var(--red-rejected-bg);
+            color: var(--red-rejected-text);
+        }
+
+        .dot-red {
+            background: var(--red-rejected-text);
+        }
+
+        .status-pill-pending {
+            background: var(--pending-bg);
+            color: var(--pending-text);
+        }
+
+        .dot-pending {
+            background: var(--pending-text);
+        }
+
+        /* Columna 6: ACCIONES */
+        .col-acciones {
+            text-align: center;
+        }
+
+        .btn-action-square {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-general);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            color: var(--purple-accent);
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 150ms ease;
+        }
+
+        .btn-action-square:hover {
+            background: var(--turquoise);
+            color: #FFFFFF;
+            border-color: var(--turquoise);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 180, 182, 0.28);
+        }
+
+        .text-no-actions {
+            color: #9C94A8;
+            font-size: 13px;
+            font-style: italic;
+            font-weight: 500;
+        }
+
+        /* Mensaje de estado vacío */
+        .empty-offers-message {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-offers-icon {
+            font-size: 38px;
+            color: #D1C7DA;
+            margin-bottom: 12px;
+        }
+
+        .empty-offers-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0 0 4px 0;
+        }
+
+        /* 6. PIE DE PÁGINA (VOLVER AL DASHBOARD) */
+        .offers-footer {
+            display: flex;
+            justify-content: flex-start;
+            margin-top: 4px;
+        }
+
+        .btn-back-dashboard {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            background: var(--surface-white);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            padding: 11px 22px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 150ms ease;
+            box-shadow: 0 2px 6px rgba(31, 21, 40, 0.02);
+        }
+
+        .btn-back-dashboard:hover {
+            background: var(--field-bg);
+            color: var(--text-main);
+            border-color: #D3C7DC;
+            transform: translateX(-3px);
+        }
+
+        /* 7. RESPONSIVE DESIGN */
+        @media (max-width: 992px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .offers-container {
+                padding: 24px 16px 50px 16px;
+                gap: 24px;
+            }
+
+            .offers-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .main-title {
+                font-size: 38px;
+            }
+
+            .btn-new-jewel {
+                width: 100%;
+                justify-content: center;
+                box-sizing: border-box;
+            }
+
+            .toolbar-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group-container {
+                width: 100%;
+                justify-content: space-between;
+                box-sizing: border-box;
+            }
+
+            .filter-pill-btn {
+                flex: 1;
+                justify-content: center;
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+
+            .search-box-container {
+                width: 100%;
+            }
+
+            /* Transformar tabla en tarjetas individuales en celular */
+            .table-card-container {
+                background: transparent;
+                border: none;
+                box-shadow: none;
+                overflow: visible;
+            }
+
+            .lux-table,
+            .lux-table tbody,
+            .lux-table tr,
+            .lux-table td {
+                display: block;
+                width: 100%;
+                min-width: 0 !important;
+                box-sizing: border-box;
+            }
+
+            .th-joya, .col-joya,
+            .th-costo, .col-costo,
+            .th-precio, .col-precio,
+            .th-stock, .col-stock,
+            .th-estado, .col-estado,
+            .th-acciones, .col-acciones {
+                width: 100% !important;
+                min-width: 0 !important;
+            }
+
+            .lux-table thead th:first-child,
+            .lux-table tbody td:first-child {
+                padding-left: 0;
+            }
+
+            .lux-table thead th:last-child,
+            .lux-table tbody td:last-child {
+                padding-right: 0;
+            }
+
+            .lux-table thead {
+                display: none; /* Ocultar encabezados de la tabla */
+            }
+
+            .lux-table tbody tr {
+                background: var(--surface-white);
+                border: 1px solid var(--border-subtle);
+                border-radius: 18px;
+                padding: 18px;
+                margin-bottom: 16px;
+                box-shadow: 0 4px 12px rgba(31, 21, 40, 0.03);
+            }
+
+            .lux-table tbody tr:hover {
+                background: var(--surface-white);
+            }
+
+            .lux-table td {
+                border-bottom: 1px solid #F4F2F7;
+                padding: 10px 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .lux-table td.col-joya {
+                border-bottom: 1px solid var(--border-subtle);
+                padding-top: 0;
+                padding-bottom: 14px;
+                margin-bottom: 6px;
+                display: block; /* Foto y nombre primero */
+            }
+
+            .lux-table td.col-acciones {
+                border-bottom: none;
+                padding-bottom: 0;
+                justify-content: flex-end;
+            }
+
+            .lux-table td::before {
+                content: attr(data-label);
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+                color: var(--text-muted);
+                letter-spacing: 0.5px;
+            }
+
+            .lux-table td.col-joya::before {
+                content: none;
+            }
+
+            .col-precio {
+                text-align: right;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="offers-container">
+        
+        <!-- Notificaciones Flash -->
+        <div th:if="${success}" class="lux-alert lux-alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="lux-alert lux-alert-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- 2. ENCABEZADO SUPERIOR -->
+        <header class="offers-header">
+            <div class="header-titles">
+                <h1 class="main-title">Mis ofertas</h1>
+                <p class="main-description">Revisa el estado de cada oferta enviada al administrador.</p>
+            </div>
+            <a th:href="@{/proveedor/productos/nuevo}" class="btn-new-jewel">
+                <i class="fas fa-plus"></i>
+                <span>Nueva joya</span>
+            </a>
+        </header>
+
+        <!-- 3. TARJETAS DE ESTADÍSTICAS (DINÁMICAS) -->
+        <section class="stats-grid">
+            <!-- Tarjeta 1: Ofertas totales -->
+            <div class="stat-card stat-card-turquoise">
+                <div class="stat-content">
+                    <span class="stat-title">Ofertas totales</span>
+                    <span class="stat-number" id="stat-total-val" th:text="${productos != null ? productos.size() : 0}">0</span>
+                </div>
+                <div class="stat-icon-wrap"><i class="fas fa-layer-group"></i></div>
+            </div>
+
+            <!-- Tarjeta 2: Aceptadas -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <span class="stat-title">Aceptadas</span>
+                    <span class="stat-number" id="stat-aceptadas-val">0</span>
+                </div>
+                <div class="stat-icon-wrap stat-icon-green"><i class="fas fa-check-circle"></i></div>
+            </div>
+
+            <!-- Tarjeta 3: Rechazadas -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <span class="stat-title">Rechazadas</span>
+                    <span class="stat-number" id="stat-rechazadas-val">0</span>
+                </div>
+                <div class="stat-icon-wrap stat-icon-red"><i class="fas fa-times-circle"></i></div>
+            </div>
+
+            <!-- Tarjeta 4: Unidades aceptadas -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <span class="stat-title">Unidades aceptadas</span>
+                    <span class="stat-number" id="stat-unidades-val">0</span>
+                </div>
+                <div class="stat-icon-wrap stat-icon-turquoise"><i class="fas fa-cubes"></i></div>
+            </div>
+        </section>
+
+        <!-- 4. BARRA DE FILTROS Y BUSCADOR -->
+        <section class="toolbar-section">
+            <!-- Filtros agrupados: Todas, Aceptadas, Rechazadas -->
+            <div class="filter-group-container">
+                <button type="button" class="filter-pill-btn active" data-filter="TODAS" onclick="filtrarPorEstado('TODAS')">
+                    <span>Todas</span>
+                    <span class="pill-count" id="count-todas">0</span>
+                </button>
+                <button type="button" class="filter-pill-btn" data-filter="ACEPTADA" onclick="filtrarPorEstado('ACEPTADA')">
+                    <span>Aceptadas</span>
+                    <span class="pill-count" id="count-aceptadas">0</span>
+                </button>
+                <button type="button" class="filter-pill-btn" data-filter="RECHAZADA" onclick="filtrarPorEstado('RECHAZADA')">
+                    <span>Rechazadas</span>
+                    <span class="pill-count" id="count-rechazadas">0</span>
+                </button>
+            </div>
+
+            <!-- Buscador a la derecha (320px) -->
+            <div class="search-box-container">
+                <i class="fas fa-search search-icon-turquoise"></i>
+                <input type="text" id="busquedaInput" class="search-input" placeholder="Buscar joya..." oninput="filtrarPorBusqueda()" />
+                <button type="button" id="clearSearchBtn" class="search-clear-btn" style="display:none;" onclick="limpiarBusqueda()" title="Limpiar búsqueda">
+                    <i class="fas fa-times-circle"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- 5. TABLA PRINCIPAL DE OFERTAS -->
+        <section class="table-card-container">
+            <div class="table-responsive-wrapper">
+                <table class="lux-table">
+                    <thead>
+                        <tr>
+                            <th class="th-joya" style="text-align: center;">JOYA</th>
+                            <th class="th-costo" style="text-align: center;">COSTO (VENTA A ADMIN)</th>
+                            <th class="th-precio" style="text-align: center;">PRECIO SUGERIDO (PÚBLICO)</th>
+                            <th class="th-stock" style="text-align: center;">STOCK / OFERTA</th>
+                            <th class="th-estado" style="text-align: center;">ESTADO</th>
+                            <th class="th-acciones" style="text-align: center;">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="offersTableBody">
+                        <tr th:each="p : ${productos}" 
+                            class="offer-row"
+                            th:attr="data-estado=${p.estadoAdmin != null ? p.estadoAdmin : 'PENDIENTE'},
+                                     data-nombre=${p.nombre != null ? p.nombre : ''},
+                                     data-categoria=${p.categoria != null ? p.categoria : ''},
+                                     data-stock-proveedor=${p.stockProveedor},
+                                     data-cantidad-ofertada=${p.cantidadOfertada},
+                                     data-detalles=${p.detallesVentaAdmin != null ? p.detallesVentaAdmin : ''}">
+                            
+                            <!-- Columna 1: JOYA -->
+                            <td class="col-joya" data-label="Joya">
+                                <div class="joya-item-flex">
+                                    <img th:src="${(p.imagen != null and p.imagen != '') ? p.imagen : '/img/placeholder.webp'}"
+                                         th:alt="${p.nombre}"
+                                         class="joya-photo"
+                                         onerror="this.src='/img/placeholder.webp'" />
+                                    <div class="joya-meta">
+                                        <span class="joya-name" th:text="${p.nombre}">Nombre de la Joya</span>
+                                        <span class="joya-category-pill" th:text="${p.categoria}">Categoría</span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Columna 2: COSTO (VENTA A ADMIN) -->
+                            <td class="col-costo" data-label="Costo (Venta a Admin)">
+                                <span class="price-val" 
+                                      th:text="'COP $ ' + ${#numbers.formatDecimal(p.costoProveedor, 1, 'POINT', 0, 'COMMA')}">COP $ 0</span>
+                            </td>
+
+                            <!-- Columna 3: PRECIO SUGERIDO (PÚBLICO) -->
+                            <td class="col-precio" data-label="Precio Sugerido">
+                                <span class="price-val" 
+                                      th:text="'COP $ ' + ${#numbers.formatDecimal(p.precio, 1, 'POINT', 0, 'COMMA')}">COP $ 0</span>
+                            </td>
+
+                            <!-- Columna 4: STOCK / OFERTA -->
+                            <td class="col-stock" data-label="Stock / Oferta">
+                                <!-- Oferta ACEPTADA -->
+                                <div th:if="${p.estadoAdmin == 'ACEPTADA'}" class="stock-accepted-wrap">
+                                    <span class="stock-number-big" th:text="${p.stockProveedor > 0 ? p.stockProveedor : p.stock}">400</span>
+                                    <span class="stock-unit-label">unidades</span>
+                                </div>
+
+                                <!-- Oferta RECHAZADA o PARCIAL -->
+                                <div th:if="${p.estadoAdmin == 'RECHAZADA'}" class="stock-rejected-wrap">
+                                    <div class="stock-rejected-top">
+                                        <span class="unidades-no-tomadas" th:text="${p.cantidadOfertada} + ' no tomadas'">0 no tomadas</span>
+                                    </div>
+                                    <div class="progress-bar-track">
+                                        <div class="progress-bar-fill" style="width: 0%;"></div>
+                                    </div>
+                                    <span class="progress-bar-caption">0 de 0 unidades tomadas</span>
+                                </div>
+
+                                <!-- Oferta PENDIENTE (En revisión) -->
+                                <div th:if="${p.estadoAdmin == 'PENDIENTE' or p.estadoAdmin == null}" class="stock-pending-wrap">
+                                    <span class="stock-number-big" th:text="${p.cantidadOfertada}">0</span>
+                                    <span class="stock-unit-label">unidades en revisión</span>
+                                </div>
+                            </td>
+
+                            <!-- Columna 5: ESTADO -->
+                            <td class="col-estado" data-label="Estado">
+                                <!-- Estado ACEPTADA -->
+                                <span th:if="${p.estadoAdmin == 'ACEPTADA'}" class="badge-pill-status status-pill-accepted">
+                                    <span class="dot-indicator dot-green"></span>
+                                    <span>Aceptada</span>
+                                </span>
+
+                                <!-- Estado RECHAZADA -->
+                                <span th:if="${p.estadoAdmin == 'RECHAZADA'}" class="badge-pill-status status-pill-rejected">
+                                    <span class="dot-indicator dot-red"></span>
+                                    <span>Rechazada</span>
+                                </span>
+
+                                <!-- Estado PENDIENTE -->
+                                <span th:if="${p.estadoAdmin == 'PENDIENTE' or p.estadoAdmin == null}" class="badge-pill-status status-pill-pending">
+                                    <span class="dot-indicator dot-pending"></span>
+                                    <span>Pendiente</span>
+                                </span>
+                            </td>
+
+                            <!-- Columna 6: ACCIONES -->
+                            <td class="col-acciones" data-label="Acciones">
+                                <!-- Editar disponible solo si PENDIENTE o RECHAZADA -->
+                                <a th:if="${p.estadoAdmin == 'PENDIENTE' or p.estadoAdmin == 'RECHAZADA'}"
+                                   th:href="@{/proveedor/productos/editar/{id}(id=${p.id})}"
+                                   class="btn-action-square"
+                                   title="Editar oferta">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+
+                                <!-- Sin acciones cuando la oferta ha sido ACEPTADA -->
+                                <span th:if="${p.estadoAdmin == 'ACEPTADA'}" class="text-no-actions">
+                                    Sin acciones
+                                </span>
+                            </td>
+                        </tr>
+
+                        <!-- Fila cuando no hay ofertas registradas en la base de datos -->
+                        <tr th:if="${productos == null or #lists.isEmpty(productos)}" id="initialEmptyRow">
+                            <td colspan="6" class="empty-offers-message">
+                                <div class="empty-offers-icon"><i class="fas fa-gem"></i></div>
+                                <h3 class="empty-offers-title">No tienes ofertas registradas</h3>
+                                <p style="margin: 0;">Envía tu primera propuesta al administrador pulsando en "+ Nueva joya".</p>
+                            </td>
+                        </tr>
+
+                        <!-- Fila cuando los filtros o búsqueda no arrojan resultados -->
+                        <tr id="emptyFilterRow" style="display: none;">
+                            <td colspan="6" class="empty-offers-message">
+                                <div class="empty-offers-icon"><i class="fas fa-search"></i></div>
+                                <h3 class="empty-offers-title">Sin resultados coincidentes</h3>
+                                <p style="margin: 0;">Prueba ajustando el término de búsqueda o cambiando el filtro seleccionado.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 6. PIE DE PÁGINA (VOLVER AL DASHBOARD) -->
+        <footer class="offers-footer">
+            <a th:href="@{/proveedor}" class="btn-back-dashboard">
+                <i class="fas fa-arrow-left"></i>
+                <span>Volver al dashboard</span>
+            </a>
+        </footer>
+
+    </div>
+
+    <!-- LÓGICA DE FILTRADO, BUSCADOR Y CÁLCULOS DINÁMICOS -->
+    <script>
+        let filtroEstadoActual = 'TODAS';
+        let textoBusquedaActual = '';
+
+        function inicializarEstadisticasYOfertas() {
+            const rows = document.querySelectorAll('.offer-row');
+            let total = rows.length;
+            let aceptadas = 0;
+            let rechazadas = 0;
+            let unidadesAceptadas = 0;
+
+            rows.forEach(row => {
+                const estado = row.getAttribute('data-estado') || 'PENDIENTE';
+                const stockProv = parseInt(row.getAttribute('data-stock-proveedor')) || 0;
+                const cantOfertada = parseInt(row.getAttribute('data-cantidad-ofertada')) || 0;
+                const detalles = row.getAttribute('data-detalles') || '';
+
+                if (estado === 'ACEPTADA') {
+                    aceptadas++;
+                    unidadesAceptadas += stockProv;
+                } else if (estado === 'RECHAZADA') {
+                    rechazadas++;
+                }
+
+                // Cálculo exacto y real para la barra de progreso en ofertas rechazadas / parciales
+                if (estado === 'RECHAZADA') {
+                    const barFill = row.querySelector('.progress-bar-fill');
+                    const barCaption = row.querySelector('.progress-bar-caption');
+                    
+                    let tomadas = 0;
+                    // Evalúa notas de devolución como "400 unidades tomadas"
+                    const match = detalles.match(/(\d+)\s+unidades\s+tomadas/i);
+                    if (match) {
+                        tomadas = parseInt(match[1]);
+                    }
+
+                    const totalOfertaOriginal = tomadas + cantOfertada;
+                    const porcentaje = totalOfertaOriginal > 0 ? Math.round((tomadas / totalOfertaOriginal) * 100) : 0;
+
+                    if (barFill) {
+                        barFill.style.width = porcentaje + '%';
+                    }
+                    if (barCaption) {
+                        if (tomadas > 0) {
+                            barCaption.innerText = `${tomadas.toLocaleString('es-CO')} de ${totalOfertaOriginal.toLocaleString('es-CO')} unidades tomadas`;
+                        } else {
+                            barCaption.innerText = `0 de ${cantOfertada.toLocaleString('es-CO')} unidades tomadas`;
+                        }
+                    }
+                }
+            });
+
+            // Actualizar tarjetas de estadísticas superiores con los datos reales
+            document.getElementById('stat-total-val').innerText = total.toLocaleString('es-CO');
+            document.getElementById('stat-aceptadas-val').innerText = aceptadas.toLocaleString('es-CO');
+            document.getElementById('stat-rechazadas-val').innerText = rechazadas.toLocaleString('es-CO');
+            document.getElementById('stat-unidades-val').innerText = unidadesAceptadas.toLocaleString('es-CO');
+
+            // Actualizar contadores en botones de filtro
+            document.getElementById('count-todas').innerText = total;
+            document.getElementById('count-aceptadas').innerText = aceptadas;
+            document.getElementById('count-rechazadas').innerText = rechazadas;
+        }
+
+        function filtrarPorEstado(estado) {
+            filtroEstadoActual = estado;
+            document.querySelectorAll('.filter-pill-btn').forEach(btn => {
+                if (btn.getAttribute('data-filter') === estado) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            aplicarFiltros();
+        }
+
+        function filtrarPorBusqueda() {
+            textoBusquedaActual = document.getElementById('busquedaInput').value.toLowerCase().trim();
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if (clearBtn) {
+                clearBtn.style.display = textoBusquedaActual !== '' ? 'block' : 'none';
+            }
+            aplicarFiltros();
+        }
+
+        function limpiarBusqueda() {
+            document.getElementById('busquedaInput').value = '';
+            filtrarPorBusqueda();
+        }
+
+        function aplicarFiltros() {
+            const rows = document.querySelectorAll('.offer-row');
+            let visibles = 0;
+
+            rows.forEach(row => {
+                const estado = row.getAttribute('data-estado');
+                const nombre = (row.getAttribute('data-nombre') || '').toLowerCase();
+                const categoria = (row.getAttribute('data-categoria') || '').toLowerCase();
+
+                const coincideEstado = (filtroEstadoActual === 'TODAS') || (estado === filtroEstadoActual);
+                const coincideBusqueda = (textoBusquedaActual === '') || 
+                                         (nombre.includes(textoBusquedaActual) || categoria.includes(textoBusquedaActual));
+
+                if (coincideEstado && coincideBusqueda) {
+                    row.style.display = '';
+                    visibles++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Control de mensaje cuando no hay resultados para el filtro actual
+            const emptyFilterRow = document.getElementById('emptyFilterRow');
+            if (emptyFilterRow) {
+                emptyFilterRow.style.display = (visibles === 0 && rows.length > 0) ? '' : 'none';
+            }
+        }
+
+        // Ejecutar al cargar la página
+        window.addEventListener('DOMContentLoaded', function() {
+            inicializarEstadisticasYOfertas();
+        });
+    </script>
+</body>
+</html>

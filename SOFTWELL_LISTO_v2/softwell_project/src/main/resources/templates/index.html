@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOFTWELL | Maison de Haute Joaillerie</title>
+  <link rel="icon" type="image/x-icon" th:href="@{/favicon-32.ico}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ["'Playfair Display'", "Georgia", "serif"],
+            sans: ["'Plus Jakarta Sans'", "sans-serif"],
+          },
+          boxShadow: {
+            'luxury': '0 20px 48px rgba(20, 20, 20, 0.05)',
+            'subtle': '0 4px 20px rgba(0, 0, 0, 0.03)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --jewel-white: #FFFFFF;
+      --jewel-black: #111111;
+      --jewel-aqua: #00A6A6;
+      --jewel-aqua-light: #D9F5F3;
+    }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--jewel-white); color: var(--jewel-black); -webkit-font-smoothing: antialiased; }
+    .font-serif { font-family: 'Playfair Display', Georgia, serif; }
+
+    body { background: var(--jewel-white) !important; color: var(--jewel-black) !important; }
+    header { background: #121212 !important; border-color: var(--jewel-aqua) !important; }
+    header a, header button { color: var(--jewel-black); }
+    header [class*="text-[#9E7D3B]"],
+    header [class*="hover:text-[#9E7D3B]"]:hover,
+    header [class*="text-[#616B75]"] { color: var(--jewel-aqua) !important; }
+    header [class*="text-red-"] { color: var(--jewel-aqua) !important; }
+    header [class*="hover:bg-red-"]:hover { background-color: var(--jewel-aqua-light) !important; }
+    header [class*="text-[#141414]"],
+    header [class*="hover:text-[#141414]"]:hover { color: var(--jewel-black) !important; }
+    header [class*="bg-[#141414]"] { background: var(--jewel-black) !important; }
+    header [class*="hover:bg-[#9E7D3B]"]:hover { background: var(--jewel-aqua) !important; }
+    header [class*="border-[#E8E4DC]"],
+    header [class*="border-[#9E7D3B]"] { border-color: var(--jewel-aqua-light) !important; }
+    header [class*="after:bg-[#9E7D3B]"]::after { background-color: var(--jewel-aqua) !important; }
+    header [class*="bg-[#9E7D3B]"] { background: var(--jewel-aqua) !important; }
+    header .logo[class*="text-[#141414]"] { color: var(--jewel-white) !important; }
+    header a[href*="/login"] {
+      background: var(--jewel-aqua) !important;
+      color: var(--jewel-white) !important;
+    }
+    header a[href*="/login"]:hover {
+      background: var(--jewel-aqua) !important;
+      color: var(--jewel-white) !important;
+    }
+
+    main, main section { background-color: var(--jewel-white); }
+    main [class*="text-[#9E7D3B]"],
+    main [class*="text-[#DFC98C]"],
+    main [class*="text-green-"],
+    main [class*="hover:text-[#9E7D3B]"]:hover { color: var(--jewel-aqua) !important; }
+    main [class*="text-[#616B75]"],
+    main [class*="text-red-"] { color: var(--jewel-black) !important; }
+    main [class*="text-[#141414]"],
+    main [class*="hover:text-[#141414]"]:hover { color: var(--jewel-black) !important; }
+    main [class*="bg-[#9E7D3B]"],
+    main [class*="hover:bg-[#9E7D3B]"]:hover { background-color: var(--jewel-aqua) !important; }
+    main [class*="bg-[#141414]"] { background-color: var(--jewel-black) !important; }
+    main [class*="bg-[#FAF9F6]"],
+    main [class*="bg-[#F7F5F0]"],
+    main [class*="bg-[#F5F3EF]"],
+    main [class*="bg-[#FFF8F8]"] { background-color: var(--jewel-white) !important; }
+    main [class*="bg-[#F6FBF7]"] { background-color: var(--jewel-aqua-light) !important; }
+    main .alert { border-color: var(--jewel-aqua) !important; }
+    main [class*="border-[#E8E4DC]"],
+    main [class*="border-[#9E7D3B]"] { border-color: var(--jewel-aqua-light) !important; }
+    #hero {
+      isolation: isolate;
+      background: var(--jewel-white) !important;
+    }
+    #hero .cta a { background: var(--jewel-aqua) !important; color: var(--jewel-white) !important; }
+    #hero .cta a:hover { background: var(--jewel-black) !important; }
+    #hero .cta a i { color: var(--jewel-white) !important; }
+    #hero::before, #hero::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      border: 1px solid var(--jewel-aqua-light);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    #hero::before { width: 33rem; height: 33rem; top: -20rem; left: -12rem; }
+    #hero::after { width: 26rem; height: 26rem; bottom: -19rem; right: 25%; }
+    #hero .hero-left h1 { color: var(--jewel-black); }
+    #hero .hero-video {
+      display: block;
+      width: min(100%, 345px);
+      max-width: 100%;
+      aspect-ratio: 9 / 16;
+      object-fit: cover;
+      margin: 0 auto;
+      border: 0;
+    }
+    #beneficios .features > div {
+      background: var(--jewel-white) !important;
+      border-color: var(--jewel-aqua-light) !important;
+      border-radius: 1rem;
+      box-shadow: 0 12px 32px rgba(17,17,17,.045);
+    }
+    #beneficios .features > div > div:first-child > div {
+      width: 2.75rem;
+      height: 2.75rem;
+      flex: 0 0 2.75rem;
+      display: grid;
+      place-items: center;
+      border-radius: 9999px;
+      background: var(--jewel-aqua-light);
+      color: var(--jewel-aqua);
+    }
+    #beneficios .features > div > div:first-child > div i { color: var(--jewel-aqua) !important; }
+    footer { background: var(--jewel-black) !important; border-color: var(--jewel-aqua) !important; }
+    footer [class*="text-[#DFC98C]"] { color: var(--jewel-aqua) !important; }
+    footer [class*="text-[#141414]"],
+    footer [class*="hover:text-[#141414]"]:hover { color: var(--jewel-black) !important; }
+    footer [class*="text-[#8E97A0]"],
+    footer [class*="text-[#6B7280]"] { color: var(--jewel-white) !important; }
+    footer [class*="border-[#2B2B2B]"],
+    footer [class*="border-[#3A3A3A]"],
+    footer [class*="border-[#DFC98C]"],
+    footer [class*="hover:border-[#DFC98C]"]:hover { border-color: var(--jewel-aqua-light) !important; }
+    footer [class*="bg-[#1E1E1E]"] { background: var(--jewel-black) !important; }
+    footer [class*="hover:bg-[#DFC98C]"]:hover { background: var(--jewel-aqua) !important; }
+    .main-nav { gap: .35rem; }
+    .main-nav .nav-link,
+    #mobile-nav .nav-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.5rem;
+      padding: .65rem 1rem;
+      border-radius: 50px;
+      background: transparent;
+      color: var(--jewel-white) !important;
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      line-height: 1;
+      text-decoration: none;
+      transition: color .2s ease, background-color .2s ease, box-shadow .2s ease;
+    }
+    .main-nav .nav-link:hover,
+    .main-nav .nav-link.is-active,
+    #mobile-nav .nav-link:hover,
+    #mobile-nav .nav-link.is-active {
+      background: var(--jewel-aqua) !important;
+      color: var(--jewel-white) !important;
+      box-shadow: 0 4px 14px rgba(0,166,166,.18);
+    }
+    #mobile-nav { align-items: flex-start; gap: .35rem; }
+    .footer-policy summary {
+      cursor: pointer;
+      list-style: none;
+      transition: color .2s ease;
+    }
+    .footer-policy summary::-webkit-details-marker { display: none; }
+    .footer-policy summary::after {
+      content: "+";
+      display: inline-block;
+      margin-left: .4rem;
+      color: var(--jewel-aqua);
+    }
+    .footer-policy[open] summary::after { content: "−"; }
+    .footer-policy summary:hover,
+    .footer-policy summary:focus-visible { color: var(--jewel-white); }
+    .footer-policy ul {
+      margin-top: .55rem;
+      padding-left: 1rem;
+      list-style: disc;
+      line-height: 1.7;
+    }
+    .footer-policy li::marker { color: var(--jewel-aqua); }
+    .product-card img {
+      box-sizing: border-box;
+      border: 2px solid var(--jewel-aqua);
+    }
+    .product-card .btn-quick-view {
+      border: 1px solid var(--jewel-aqua) !important;
+      background: transparent !important;
+      color: var(--jewel-aqua) !important;
+    }
+    .product-card-link:hover .btn-quick-view,
+    .product-card-link:focus .btn-quick-view,
+    .product-card-link:focus-visible .btn-quick-view,
+    .product-card-link:active .btn-quick-view {
+      border-color: var(--jewel-aqua) !important;
+      background: var(--jewel-aqua) !important;
+      color: var(--jewel-white) !important;
+    }
+    .contacto-info > div {
+      border: 2px solid #3bb3bd;
+      border-radius: 12px;
+    }
+    .contacto-info > div:hover {
+      border-color: #3bb3bd;
+    }
+    html body,
+    html body *:not(i):not(svg):not(canvas):not([class*="fa-"]) {
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+    html body h1,
+    html body h2,
+    html body h3,
+    html body h4,
+    html body h5,
+    html body h6,
+    html body .font-serif,
+    html body .logo {
+      font-family: 'Playfair Display', Georgia, serif !important;
+      font-weight: 700 !important;
+    }
+    ::selection { background: var(--jewel-aqua-light); color: var(--jewel-black); }
+    @media (max-width: 640px) {
+      #hero::before { width: 22rem; height: 22rem; top: -15rem; left: -13rem; }
+      #hero::after { width: 18rem; height: 18rem; right: -12rem; bottom: 8rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+
+<body class="bg-[#FAF9F6] text-[#141414] antialiased selection:bg-[#9E7D3B]/20">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="site-header sticky top-0 z-50 bg-[#FAF9F6]/95 backdrop-blur-md border-b border-[#E8E4DC]">
+    <div class="container header-inner max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+
+        <a class="logo font-serif text-xl tracking-[0.15em] text-[#141414] hover:text-[#9E7D3B] transition-colors" th:href="@{/}">
+          SOFTWELL
+        </a>
+
+        <nav class="main-nav hidden lg:flex items-center">
+          <a class="nav-link is-active" aria-current="page" th:href="@{/}">Inicio</a>
+          <a class="nav-link" th:href="@{/catalogo}">Catálogo</a>
+          <a class="nav-link" th:href="@{/#testimonios}" sec:authorize="!hasRole('PROVEEDOR')">Testimonios</a>
+          <a class="nav-link" th:href="@{/#nosotros}" sec:authorize="!hasRole('PROVEEDOR')">Nosotros</a>
+          <a class="nav-link" th:href="@{/#contacto}" sec:authorize="!hasRole('PROVEEDOR')">Contacto</a>
+        </nav>
+
+        <div class="flex items-center gap-3">
+
+          <!-- Carrito (contador real desde CartService) -->
+          <a aria-label="Carrito de compras" sec:authorize="!hasRole('PROVEEDOR')"
+             class="carrito relative flex items-center justify-center w-10 h-10 rounded-full border border-[#E8E4DC] bg-white text-[#141414] hover:border-[#9E7D3B] hover:text-[#9E7D3B] transition-all shadow-sm"
+             th:href="@{/carrito}">
+            <i class="fas fa-shopping-cart text-xs"></i>
+            <span th:if="${cartItemCount != null and cartItemCount > 0}" th:text="${cartItemCount}"
+                  class="absolute -top-1 -right-1 bg-[#9E7D3B] text-white text-[10px] font-bold min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center">0</span>
+          </a>
+
+          <div class="user-menu-container relative group">
+
+            <!-- Anónimo -->
+            <a sec:authorize="isAnonymous()" th:href="@{/login}"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#141414] text-white text-xs font-semibold tracking-wider uppercase hover:bg-[#9E7D3B] transition-colors">
+              <i class="fas fa-user text-xs"></i> Inicia Sesión
+            </a>
+
+            <!-- CLIENTE -->
+            <div sec:authorize="hasRole('CLIENTE')" class="user-dropdown">
+              <button type="button" class="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-[#9E7D3B]/40 bg-white hover:border-[#9E7D3B] transition-all shadow-sm focus:outline-none">
+                <i class="fas fa-user-circle text-lg text-[#9E7D3B]"></i>
+                <span class="text-xs font-semibold tracking-wider uppercase hidden sm:inline-block" sec:authentication="name">usuario</span>
+                <i class="fas fa-chevron-down text-[9px] text-[#616B75] group-hover:rotate-180 transition-transform duration-200"></i>
+              </button>
+              <div class="dropdown-content absolute right-0 pt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div class="bg-white border border-[#E8E4DC] shadow-luxury py-2">
+                  <a th:href="@{/perfil}" class="flex items-center gap-2.5 px-4 py-2 text-xs text-[#616B75] hover:text-[#141414] hover:bg-[#FAF9F6]">
+                    <i class="fas fa-user-circle text-[#9E7D3B]"></i> Mi Perfil
+                  </a>
+                  <form th:action="@{/logout}" method="post" class="m-0">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-red-700 hover:bg-red-50 text-left">
+                      <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- PROVEEDOR -->
+            <div sec:authorize="hasRole('PROVEEDOR')" class="user-dropdown">
+              <button type="button" class="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-[#9E7D3B]/40 bg-white hover:border-[#9E7D3B] transition-all shadow-sm focus:outline-none">
+                <i class="fas fa-truck text-lg text-[#9E7D3B]"></i>
+                <span class="text-xs font-semibold tracking-wider uppercase hidden sm:inline-block">Proveedor</span>
+                <i class="fas fa-chevron-down text-[9px] text-[#616B75] group-hover:rotate-180 transition-transform duration-200"></i>
+              </button>
+              <div class="dropdown-content absolute right-0 pt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div class="bg-white border border-[#E8E4DC] shadow-luxury py-2">
+                  <a th:href="@{/proveedor}" class="flex items-center gap-2.5 px-4 py-2 text-xs text-[#616B75] hover:text-[#141414] hover:bg-[#FAF9F6]">
+                    <i class="fas fa-boxes text-[#9E7D3B]"></i> Panel Proveedor
+                  </a>
+                  <a th:href="@{/proveedor/perfil}" class="flex items-center gap-2.5 px-4 py-2 text-xs text-[#616B75] hover:text-[#141414] hover:bg-[#FAF9F6]">
+                    <i class="fas fa-user-cog text-[#9E7D3B]"></i> Mi Cuenta
+                  </a>
+                  <form th:action="@{/logout}" method="post" class="m-0">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-red-700 hover:bg-red-50 text-left">
+                      <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- ADMIN -->
+            <div sec:authorize="hasRole('ADMIN')" class="user-dropdown">
+              <button type="button" class="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-[#9E7D3B]/40 bg-white hover:border-[#9E7D3B] transition-all shadow-sm focus:outline-none">
+                <i class="fas fa-user-shield text-lg text-[#9E7D3B]"></i>
+                <span class="text-xs font-semibold tracking-wider uppercase hidden sm:inline-block">Admin</span>
+                <i class="fas fa-chevron-down text-[9px] text-[#616B75] group-hover:rotate-180 transition-transform duration-200"></i>
+              </button>
+              <div class="dropdown-content absolute right-0 pt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div class="bg-white border border-[#E8E4DC] shadow-luxury py-2">
+                  <a th:href="@{/admin}" class="flex items-center gap-2.5 px-4 py-2 text-xs text-[#616B75] hover:text-[#141414] hover:bg-[#FAF9F6]">
+                    <i class="fas fa-tachometer-alt text-[#9E7D3B]"></i> Panel Admin
+                  </a>
+                  <form th:action="@{/logout}" method="post" class="m-0">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-red-700 hover:bg-red-50 text-left">
+                      <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botón menú móvil -->
+          <button type="button" id="menu-toggle" aria-label="Menú"
+                  class="lg:hidden w-10 h-10 rounded-full border border-[#E8E4DC] bg-white flex items-center justify-center">
+            <i class="fas fa-bars text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navegación móvil -->
+      <nav id="mobile-nav" class="hidden lg:hidden pb-4 flex-col">
+        <a class="nav-link is-active" aria-current="page" th:href="@{/}">Inicio</a>
+        <a class="nav-link" th:href="@{/catalogo}">Catálogo</a>
+        <a class="nav-link" th:href="@{/#testimonios}" sec:authorize="!hasRole('PROVEEDOR')">Testimonios</a>
+        <a class="nav-link" th:href="@{/#nosotros}" sec:authorize="!hasRole('PROVEEDOR')">Nosotros</a>
+        <a class="nav-link" th:href="@{/#contacto}" sec:authorize="!hasRole('PROVEEDOR')">Contacto</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="inicio">
+
+    <!-- ===================== ALERTAS ===================== -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 space-y-2" th:if="${success != null or error != null}">
+      <div th:if="${success}" class="alert alert-success bg-[#F6FBF7] border-l-2 border-green-700 px-4 py-2.5 text-xs flex items-center gap-2.5" role="alert">
+        <i class="fas fa-check-circle text-green-700"></i>
+        <span th:text="${success}"></span>
+      </div>
+      <div th:if="${error}" class="alert alert-error bg-[#FFF8F8] border-l-2 border-red-800 px-4 py-2.5 text-xs flex items-center gap-2.5" role="alert">
+        <i class="fas fa-exclamation-circle text-red-700"></i>
+        <span th:text="${error}"></span>
+      </div>
+    </div>
+
+    <!-- ===================== HERO ===================== -->
+    <section id="hero" class="hero section relative pt-4 pb-6 md:pt-6 md:pb-8 overflow-hidden bg-gradient-to-b from-[#FAF9F6] via-[#F7F5F0] to-[#FAF9F6]"
+             sec:authorize="!hasRole('PROVEEDOR')">
+      <div class="container hero-grid max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-center">
+
+          <div class="hero-left md:col-span-7 text-center md:text-left">
+            <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-medium tracking-tight leading-[1.1] mb-2">SOFTWELL</h1>
+            <p class="lead text-lg sm:text-xl text-[#9E7D3B] font-serif italic mb-4">Joyas únicas para momentos inolvidables</p>
+            <p class="text-sm sm:text-base text-[#616B75] leading-relaxed max-w-xl mx-auto md:mx-0 mb-5">
+              Selección exclusiva de alta joyería con gemas certificadas y metales preciosos para perpetuar momentos de distinción inolvidable.
+            </p>
+            <div class="cta flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
+              <a th:href="@{/catalogo}"
+                 class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#141414] text-white text-xs font-semibold tracking-[0.2em] uppercase hover:bg-[#9E7D3B] transition-colors duration-300 shadow-md">
+                <i class="fas fa-gem text-xs text-[#DFC98C]"></i>
+                <span>Ver Catálogo</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="hero-media md:col-span-5 relative">
+            <div class="relative mx-auto md:ml-auto md:mr-0 w-full max-w-[365px] bg-white p-2.5 border border-[#E8E4DC] shadow-luxury">
+              <video class="hero-video" autoplay muted loop playsinline preload="metadata"
+                     aria-label="Video de diamante">
+                <source th:src="@{/img/diamante.mp4}" type="video/mp4">
+                Tu navegador no puede reproducir este video.
+              </video>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== BENEFICIOS ===================== -->
+    <section id="beneficios" class="section py-10 md:py-16 bg-white border-y border-[#E8E4DC]" sec:authorize="!hasRole('PROVEEDOR')">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-2xl mx-auto mb-8">
+          <span class="text-[11px] font-bold tracking-[0.25em] uppercase text-[#9E7D3B] block mb-2">Compromiso y Distinción</span>
+          <h2 class="font-serif text-3xl sm:text-4xl font-medium">¿Por qué elegirnos?</h2>
+          <div class="w-12 h-px bg-[#9E7D3B] mx-auto mt-4"></div>
+        </div>
+        <div class="features grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="p-8 bg-[#FAF9F6] border border-[#E8E4DC] hover:border-[#9E7D3B]/60 transition-all duration-300 hover:shadow-subtle">
+            <div class="flex items-center gap-3 mb-4">
+              <div><i class="fas fa-check text-sm"></i></div>
+              <h3 class="font-serif text-xl font-semibold">Garantía de calidad</h3>
+            </div>
+            <p class="text-sm text-[#616B75] leading-relaxed">Oro puro 18k certificado, plata de ley y gemas preciosas avaladas por rigurosos estándares gemológicos internacionales.</p>
+          </div>
+          <div class="p-8 bg-[#FAF9F6] border border-[#E8E4DC] hover:border-[#9E7D3B]/60 transition-all duration-300 hover:shadow-subtle">
+            <div class="flex items-center gap-3 mb-4">
+              <div><i class="fas fa-gem text-sm"></i></div>
+              <h3 class="font-serif text-xl font-semibold">Diseños exclusivos</h3>
+            </div>
+            <p class="text-sm text-[#616B75] leading-relaxed">Piezas artesanales de edición limitada y servicios de orfebrería de alta precisión a la medida de sus deseos.</p>
+          </div>
+          <div class="p-8 bg-[#FAF9F6] border border-[#E8E4DC] hover:border-[#9E7D3B]/60 transition-all duration-300 hover:shadow-subtle">
+            <div class="flex items-center gap-3 mb-4">
+              <div><i class="fas fa-heart text-sm"></i></div>
+              <h3 class="font-serif text-xl font-semibold">Atención personalizada</h3>
+            </div>
+            <p class="text-sm text-[#616B75] leading-relaxed">Asesoría directa y confidencial brindada por maestros joyeros certificados.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRODUCTOS DESTACADOS (BD) ===================== -->
+    <section id="destacados" class="section py-10 md:py-16 bg-[#FAF9F6]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 border-b border-[#E8E4DC] pb-6">
+          <div>
+            <h2 class="font-serif text-3xl sm:text-4xl font-medium">Productos Destacados</h2>
+            <p class="text-sm text-[#616B75] mt-1">Nuestras piezas más codiciadas y admiradas del atelier.</p>
+          </div>
+          <a th:href="@{/catalogo}" class="mt-4 md:mt-0 text-xs tracking-[0.18em] uppercase font-semibold hover:text-[#9E7D3B] flex items-center gap-2 group">
+            <span>Ver Catálogo</span>
+            <i class="fas fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+          </a>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <a th:each="p : ${destacados}" th:href="@{/productos/{id}(id=${p.id})}" class="product-card-link group block">
+            <div class="product-card h-full bg-white border border-[#E8E4DC] hover:border-[#9E7D3B]/50 transition-all duration-300 flex flex-col hover:shadow-luxury">
+              <div class="relative aspect-square overflow-hidden bg-[#F5F3EF] flex items-center justify-center">
+                <i class="far fa-gem text-3xl text-[#9E7D3B]/30 absolute"></i>
+                <span th:if="${p.destacado}" class="absolute top-3 left-3 z-10 text-[9px] font-bold tracking-[0.18em] uppercase bg-white/95 px-2.5 py-1 border border-[#E8E4DC]">Destacado</span>
+                <img th:if="${p.imagen != null and !#strings.isEmpty(p.imagen)}"
+                     th:src="${p.imagen}" th:alt="${p.nombre}"
+                     class="relative w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                     onerror="this.style.display='none'">
+              </div>
+              <div class="p-4 sm:p-5 flex flex-col flex-grow">
+                <span class="text-[10px] tracking-[0.15em] uppercase text-[#9E7D3B] font-semibold mb-1" th:text="${p.categoria}">Categoría</span>
+                <h3 class="font-serif text-base sm:text-lg font-medium mb-2 truncate" th:text="${p.nombre}">Nombre</h3>
+                <p class="product-price font-serif text-lg font-semibold mb-4"
+                   th:text="'COP $ ' + ${#numbers.formatDecimal(p.precio, 1, 'POINT', 0, 'COMMA')}">COP $ 0</p>
+                <span class="btn-quick-view mt-auto w-full py-2.5 px-3 bg-[#FAF9F6] border border-[#E8E4DC] text-[11px] font-semibold uppercase tracking-wider group-hover:bg-[#141414] group-hover:text-white group-hover:border-[#141414] transition-colors flex items-center justify-center gap-2">
+                  <i class="fas fa-eye text-[10px]"></i> Ver Detalles
+                </span>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <p th:if="${#lists.isEmpty(destacados)}" class="text-center text-sm text-[#616B75] py-10">Aún no hay productos destacados.</p>
+      </div>
+    </section>
+
+    <!-- ===================== NUEVA TEMPORADA (BD) ===================== -->
+    <section id="nueva-temporada" class="section py-10 md:py-16 bg-white border-t border-[#E8E4DC]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-2xl mx-auto mb-8">
+          <h2 class="font-serif text-3xl sm:text-4xl font-medium">Colección Nueva Temporada</h2>
+          <div class="w-12 h-px bg-[#9E7D3B] mx-auto mt-4"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <a th:each="p : ${temporada}" th:href="@{/productos/{id}(id=${p.id})}" class="product-card-link group block">
+            <div class="product-card h-full bg-[#FAF9F6] border border-[#E8E4DC] hover:border-[#9E7D3B]/60 p-6 flex flex-col sm:flex-row gap-6 items-center transition-all duration-300 hover:shadow-luxury">
+              <div class="relative w-full sm:w-48 aspect-square overflow-hidden bg-white border border-[#E8E4DC] flex-shrink-0 flex items-center justify-center">
+                <i class="far fa-gem text-3xl text-[#9E7D3B]/30 absolute"></i>
+                <span class="absolute top-2 left-2 z-10 text-[9px] font-bold tracking-[0.15em] uppercase bg-[#141414] text-white px-2 py-0.5">Nuevo</span>
+                <img th:if="${p.imagen != null and !#strings.isEmpty(p.imagen)}"
+                     th:src="${p.imagen}" th:alt="${p.nombre}"
+                     class="relative w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                     onerror="this.style.display='none'">
+              </div>
+              <div class="flex flex-col flex-grow w-full text-center sm:text-left">
+                <span class="text-[10px] tracking-[0.2em] uppercase font-semibold text-[#9E7D3B] mb-1" th:text="${p.categoria}">Categoría</span>
+                <h3 class="font-serif text-xl font-medium mb-2" th:text="${p.nombre}">Nombre</h3>
+                <p th:if="${p.descripcion != null and !#strings.isEmpty(p.descripcion)}"
+                   class="text-xs text-[#616B75] leading-relaxed mb-4 line-clamp-3" th:text="${p.descripcion}"></p>
+                <p class="product-price font-serif text-xl font-bold mb-4"
+                   th:text="'COP $ ' + ${#numbers.formatDecimal(p.precio, 1, 'POINT', 0, 'COMMA')}">COP $ 0</p>
+                <span class="btn-quick-view w-full py-2.5 px-4 bg-[#141414] text-white text-[11px] font-semibold uppercase tracking-wider group-hover:bg-[#9E7D3B] transition-colors flex items-center justify-center gap-2">
+                  <i class="fas fa-eye text-[10px]"></i> Ver Detalles
+                </span>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <p th:if="${#lists.isEmpty(temporada)}" class="text-center text-sm text-[#616B75] py-10">Pronto nuevas piezas.</p>
+      </div>
+    </section>
+
+    <!-- ===================== TESTIMONIOS (BD) ===================== -->
+    <section id="testimonios" class="section py-10 md:py-16 bg-[#FAF9F6]" sec:authorize="!hasRole('PROVEEDOR')">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <span class="text-[11px] font-bold tracking-[0.25em] uppercase text-[#9E7D3B] block mb-2">Experiencias Inolvidables</span>
+        <h2 class="font-serif text-3xl sm:text-4xl font-medium mb-8">Lo que dicen nuestros clientes</h2>
+
+        <div class="carrusel-container relative" th:if="${!#lists.isEmpty(testimonios)}">
+          <div class="carrusel">
+            <div class="testimonio-slide" th:each="testimonio, it : ${testimonios}" th:classappend="${it.first} ? '' : 'hidden'">
+              <div class="testimonio-card bg-white border border-[#E8E4DC] p-8 md:p-14 shadow-luxury">
+                <div class="testimonio-avatar relative w-16 h-16 rounded-full border border-[#9E7D3B]/40 p-1 mx-auto mb-6 bg-white shadow-sm flex items-center justify-center">
+                  <i class="fas fa-user text-[#9E7D3B]/40 absolute"></i>
+                  <img th:if="${testimonio.imagenCliente != null and !#strings.isEmpty(testimonio.imagenCliente)}"
+                       th:src="@{${testimonio.imagenCliente}}" th:alt="${testimonio.nombreCliente}"
+                       class="relative w-full h-full rounded-full object-cover"
+                       onerror="this.style.display='none'">
+                </div>
+                <div class="flex justify-center gap-1.5 text-[#9E7D3B] text-xs mb-6">
+                  <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <p class="testimonio-text font-serif italic text-lg sm:text-2xl leading-relaxed max-w-2xl mx-auto mb-8"
+                   th:text="'&quot;' + ${testimonio.texto} + '&quot;'"></p>
+                <div class="border-t border-[#E8E4DC] pt-4 max-w-xs mx-auto">
+                  <span class="testimonio-nombre text-xs font-bold uppercase tracking-[0.2em] block" th:text="${testimonio.nombreCliente}"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-center gap-4 mt-6" th:if="${#lists.size(testimonios) > 1}">
+            <button type="button" id="t-prev" aria-label="Anterior" class="w-9 h-9 rounded-full border border-[#E8E4DC] bg-white hover:border-[#9E7D3B] hover:text-[#9E7D3B] transition-colors"><i class="fas fa-chevron-left text-xs"></i></button>
+            <button type="button" id="t-next" aria-label="Siguiente" class="w-9 h-9 rounded-full border border-[#E8E4DC] bg-white hover:border-[#9E7D3B] hover:text-[#9E7D3B] transition-colors"><i class="fas fa-chevron-right text-xs"></i></button>
+          </div>
+        </div>
+
+        <p th:if="${#lists.isEmpty(testimonios)}" class="text-sm text-[#616B75]">Aún no hay testimonios para mostrar.</p>
+      </div>
+    </section>
+
+    <!-- ===================== NOSOTROS ===================== -->
+    <section id="nosotros" class="section py-10 md:py-16 bg-white border-y border-[#E8E4DC]" sec:authorize="!hasRole('PROVEEDOR')">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="w-12 h-12 rounded-full border border-[#9E7D3B]/40 flex items-center justify-center mx-auto mb-6 bg-[#FAF9F6]">
+          <i class="fas fa-gem text-lg text-[#9E7D3B]"></i>
+        </div>
+        <span class="text-[11px] font-bold tracking-[0.25em] uppercase text-[#9E7D3B] block mb-2">Nuestra Historia y Pasión</span>
+        <h2 class="font-serif text-3xl sm:text-4xl font-medium mb-6">Sobre Nosotros</h2>
+        <p class="text-base sm:text-lg text-[#616B75] leading-relaxed max-w-2xl mx-auto font-light">
+          Somos una joyería con más de 20 años de experiencia, ofreciendo piezas únicas y personalizadas para cada ocasión especial.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===================== CONTACTO ===================== -->
+    <section id="contacto" class="section contacto py-10 md:py-16 bg-[#FAF9F6]" sec:authorize="!hasRole('PROVEEDOR')">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-2xl mx-auto mb-8">
+          <span class="text-[11px] font-bold tracking-[0.25em] uppercase text-[#9E7D3B] block mb-2">Visítanos o Contáctanos</span>
+          <h2 class="font-serif text-3xl sm:text-4xl font-medium">Contacto</h2>
+          <div class="w-12 h-px bg-[#9E7D3B] mx-auto mt-4"></div>
+        </div>
+
+        <div class="contacto-info grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div class="bg-white border border-[#E8E4DC] p-8 flex flex-col items-center text-center hover:border-[#9E7D3B]/50 transition-colors shadow-subtle">
+            <div class="w-12 h-12 rounded-full bg-[#FAF9F6] border border-[#9E7D3B]/30 flex items-center justify-center text-[#9E7D3B] mb-5"><i class="fas fa-map-marker-alt"></i></div>
+            <h4 class="text-xs font-bold tracking-[0.2em] uppercase text-[#616B75] mb-2">Ubicación</h4>
+            <span class="font-serif text-base font-medium">Calle 123, Cartagena, Colombia</span>
+          </div>
+          <div class="bg-white border border-[#E8E4DC] p-8 flex flex-col items-center text-center hover:border-[#9E7D3B]/50 transition-colors shadow-subtle">
+            <div class="w-12 h-12 rounded-full bg-[#FAF9F6] border border-[#9E7D3B]/30 flex items-center justify-center text-[#9E7D3B] mb-5"><i class="fas fa-phone"></i></div>
+            <h4 class="text-xs font-bold tracking-[0.2em] uppercase text-[#616B75] mb-2">Teléfono</h4>
+            <a class="font-serif text-base font-medium text-[#141414] hover:text-[#9E7D3B] transition-colors" href="tel:+573234666478">+57 323 466 6478</a>
+          </div>
+          <div class="bg-white border border-[#E8E4DC] p-8 flex flex-col items-center text-center hover:border-[#9E7D3B]/50 transition-colors shadow-subtle">
+            <div class="w-12 h-12 rounded-full bg-[#FAF9F6] border border-[#9E7D3B]/30 flex items-center justify-center text-[#9E7D3B] mb-5"><i class="fas fa-envelope"></i></div>
+            <h4 class="text-xs font-bold tracking-[0.2em] uppercase text-[#616B75] mb-2">Correo</h4>
+            <a class="font-serif text-base font-medium text-[#141414] hover:text-[#9E7D3B] transition-colors break-all" href="mailto:contacto@LatinJewelryElegance.com">softwell2026@gmail.com</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="site-footer bg-[#141414] text-white pt-16 pb-12 border-t border-[#2B2B2B]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="footer-content grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-[#2B2B2B]">
+
+        <div class="footer-section md:col-span-4 text-center md:text-left">
+          <h4 class="font-serif text-lg tracking-[0.15em] mb-4">SOFTWELL</h4>
+          <p class="text-xs text-[#8E97A0] leading-relaxed max-w-sm mx-auto md:mx-0">
+            Alta joyería latinoamericana, orfebrería de precisión y la nobleza de las piedras preciosas auténticas.
+          </p>
+        </div>
+
+        <div class="footer-section md:col-span-2 text-center md:text-left">
+          <h5 class="text-xs uppercase tracking-[0.2em] text-[#DFC98C] font-semibold mb-4">Enlaces</h5>
+          <ul class="space-y-2 text-xs text-[#8E97A0]">
+            <li><a class="hover:text-white transition-colors" th:href="@{/}">Inicio</a></li>
+            <li><a class="hover:text-white transition-colors" th:href="@{/catalogo}">Catálogo</a></li>
+            <li sec:authorize="!hasRole('PROVEEDOR')"><a class="hover:text-white transition-colors" th:href="@{/#testimonios}">Testimonios</a></li>
+            <li sec:authorize="!hasRole('PROVEEDOR')"><a class="hover:text-white transition-colors" th:href="@{/#nosotros}">Sobre Nosotros</a></li>
+            <li sec:authorize="!hasRole('PROVEEDOR')"><a class="hover:text-white transition-colors" th:href="@{/#contacto}">Contacto</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-section md:col-span-3 md:translate-x-8 text-center md:text-left">
+          <h5 class="text-xs uppercase tracking-[0.2em] text-[#DFC98C] font-semibold mb-4">Políticas</h5>
+          <ul class="space-y-2 text-xs text-[#8E97A0]">
+            <li>
+              <details class="footer-policy">
+                <summary>Política de privacidad</summary>
+                <ul>
+                  <li>Datos de cuenta: nombre y correo electrónico.</li>
+                  <li>Datos de contacto y entrega proporcionados al registrarte o comprar.</li>
+                  <li>Uso de la información para gestionar tu cuenta, pedidos y atención al cliente.</li>
+                  <li>Solicitudes sobre tus datos: utiliza el correo de contacto publicado en esta página.</li>
+                </ul>
+              </details>
+            </li>
+            <li>
+              <details class="footer-policy">
+                <summary>Términos y condiciones</summary>
+                <ul>
+                  <li>el usuario debe proporcionar información veraz y mantener actualizados sus datos de registro.</li>
+                  <li>Consulta de productos, características y precios publicados.</li>
+                  <li>Confirmación de pedidos y selección del método de pago disponible.</li>
+                  <li>Importancia de proporcionar datos correctos para la entrega.</li>
+                  <li>Consultas sobre compras: utiliza el correo de contacto publicado en esta página.</li>
+                </ul>
+              </details>
+            </li>
+          </ul>
+        </div>
+
+        <div class="footer-section md:col-span-3 text-center md:text-right">
+          <h5 class="text-xs uppercase tracking-[0.2em] text-[#DFC98C] font-semibold mb-4">Síguenos</h5>
+          <div class="footer-social flex justify-center md:justify-end gap-3">
+            <a aria-label="Instagram" href="https://www.instagram.com/" target="_blank" class="w-9 h-9 rounded-full border border-[#3A3A3A] bg-[#1E1E1E] hover:text-[#141414] hover:bg-[#DFC98C] hover:border-[#DFC98C] flex items-center justify-center transition-all"><i class="fab fa-instagram text-xs"></i></a>
+            <a aria-label="Facebook" href="https://www.facebook.com/" target="_blank" class="w-9 h-9 rounded-full border border-[#3A3A3A] bg-[#1E1E1E] hover:text-[#141414] hover:bg-[#DFC98C] hover:border-[#DFC98C] flex items-center justify-center transition-all"><i class="fab fa-facebook-f text-xs"></i></a>
+            <a aria-label="WhatsApp" href="https://wa.me/573234666478" target="_blank" class="w-9 h-9 rounded-full border border-[#3A3A3A] bg-[#1E1E1E] hover:text-[#141414] hover:bg-[#DFC98C] hover:border-[#DFC98C] flex items-center justify-center transition-all"><i class="fab fa-whatsapp text-xs"></i></a>
+          </div>
+          <p class="text-[10px] text-[#6B7280] uppercase tracking-wider mt-4">Cartagena de Indias · Colombia</p>
+        </div>
+      </div>
+
+      <div class="pt-8 text-center md:text-left text-[11px] text-[#6B7280]">
+        <p>&copy; 2025 SOFTWELL. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Menú móvil
+    document.getElementById('menu-toggle').addEventListener('click', function () {
+      var nav = document.getElementById('mobile-nav');
+      nav.classList.toggle('hidden');
+      nav.classList.toggle('flex');
+    });
+
+    // Mantener resaltado el enlace que corresponde al fragmento actual.
+    (function () {
+      var links = document.querySelectorAll('.main-nav .nav-link, #mobile-nav .nav-link');
+      function updateActiveLink() {
+        var currentHash = window.location.hash || '';
+        links.forEach(function (link) {
+          var href = new URL(link.href, window.location.href);
+          var isActive = currentHash
+            ? href.hash === currentHash
+            : href.pathname === window.location.pathname && !href.hash;
+          link.classList.toggle('is-active', isActive);
+          if (isActive) {
+            link.setAttribute('aria-current', 'page');
+          } else {
+            link.removeAttribute('aria-current');
+          }
+        });
+      }
+      updateActiveLink();
+      window.addEventListener('hashchange', updateActiveLink);
+    })();
+
+    // Carrusel de testimonios
+    (function () {
+      var slides = document.querySelectorAll('.testimonio-slide');
+      if (slides.length < 2) return;
+      var i = 0, timer;
+      function show(n) {
+        slides[i].classList.add('hidden');
+        i = (n + slides.length) % slides.length;
+        slides[i].classList.remove('hidden');
+      }
+      function auto() { clearInterval(timer); timer = setInterval(function () { show(i + 1); }, 6000); }
+      document.getElementById('t-prev').addEventListener('click', function () { show(i - 1); auto(); });
+      document.getElementById('t-next').addEventListener('click', function () { show(i + 1); auto(); });
+      auto();
+    })();
+  </script>
+</body>
+</html>

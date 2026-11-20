@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon-32.ico}">
+    <title>Proveedores - Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="admin-app">
+    <div class="admin-container">
+        <aside th:replace="~{fragments/admin-sidebar :: sidebar}"></aside>
+        <main class="admin-main-content">
+    <h1>Gestión de Proveedores</h1>
+    <div th:if="${success}" style="color: green" th:text="${success}"></div>
+    <a th:href="@{/admin/proveedores/nuevo}">Agregar Nuevo Proveedor</a>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Dirección</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="p : ${proveedores}">
+                <td th:text="${p.nombre}"></td>
+                <td th:text="${p.email}"></td>
+                <td th:text="${p.telefono}"></td>
+                <td th:text="${p.direccion}"></td>
+                <td>
+                    <a th:href="@{/admin/proveedores/editar/{id}(id=${p.id})}">Editar</a>
+                    <form th:action="@{/admin/proveedores/eliminar/{id}(id=${p.id})}" method="post" style="display:inline;">
+                        <button type="submit" onclick="return confirm('¿Eliminar proveedor?')">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
+    <a th:href="@{/admin}">Volver al Dashboard</a>
+        </main>
+    </div>
+</body>
+</html>

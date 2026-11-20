@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon-32.ico}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de productos | Administración LJE</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body.admin-app .gp-main,
+        body.admin-app .gp-main *:not([class*="fa-"]):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) {
+            font-family: "Plus Jakarta Sans", sans-serif !important;
+        }
+        body.admin-app:not(.lje-admin-dashboard) main.admin-main-content.gp-main {
+            background-color: #eef7f7;
+            background-image:
+                radial-gradient(800px 420px at 90% -5%, rgba(0,180,182,.18), transparent 70%),
+                radial-gradient(600px 400px at 10% 100%, rgba(85,214,200,.16), transparent 70%);
+            background-attachment: fixed;
+        }
+        body.admin-app .gp-main .gp-banner h1:not([class*="fa-"]),
+        body.admin-app .gp-main .gp-card-body h2:not([class*="fa-"]),
+        body.admin-app .gp-main .gp-dialog h2:not([class*="fa-"]) {
+            font-family: "Playfair Display", Georgia, "Times New Roman", serif !important;
+        }
+
+        body.admin-app .gp-main {
+            --gp-teal: #00b4b6;
+            --gp-teal-hi: #55d6c8;
+            --gp-teal-lo: #008f91;
+            --gp-teal-ink: #006c6e;
+            --gp-ink: #032325;
+            --gp-ink-2: #053a3c;
+            --gp-bg: #eef7f7;
+            --gp-paper: #fff;
+            --gp-text: #142225;
+            --gp-muted: #5d7173;
+            --gp-line: #d6e8e8;
+            --gp-gold: #d4a62a;
+            --gp-gold-hi: #f0cf73;
+            --gp-red: #c0392b;
+            --gp-red-bg: #fdeceb;
+            --gp-amber: #8a5a00;
+            --gp-amber-bg: #fff0cc;
+            --gp-ok: #0d6b55;
+            --gp-ok-bg: #d8f3ea;
+            display: block;
+            height: auto;
+            min-height: 100vh;
+            padding: 24px clamp(16px, 3vw, 40px) 60px;
+            overflow: visible;
+            color: var(--gp-text);
+            line-height: 1.5;
+            background-color: var(--gp-bg);
+            background-image:
+                radial-gradient(800px 420px at 90% -5%, rgba(0,180,182,.18), transparent 70%),
+                radial-gradient(600px 400px at 10% 100%, rgba(85,214,200,.16), transparent 70%);
+            background-attachment: fixed;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body.admin-app .gp-main *,
+        body.admin-app .gp-main *::before,
+        body.admin-app .gp-main *::after { box-sizing: border-box; }
+
+        body.admin-app .gp-main a { color: inherit; }
+        body.admin-app .gp-main :focus-visible { outline: 3px solid var(--gp-teal); outline-offset: 3px; border-radius: 10px; }
+
+        .gp-banner {
+            position: relative;
+            overflow: hidden;
+            padding: clamp(20px, 3vw, 32px);
+            border-radius: 30px;
+            color: var(--gp-ink);
+            background: linear-gradient(115deg, #00b4b6 0%, #2cc9c3 55%, #7fe3d6 100%);
+            box-shadow: 0 30px 60px -34px rgba(0,143,145,.9);
+        }
+        .gp-banner-top { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        .gp-banner h1 { margin: 0; color: var(--gp-ink); font: 700 clamp(2.1rem, 4.4vw, 3.2rem)/1 "Playfair Display", Georgia, serif; }
+        .gp-banner p { margin: 6px 0 0; color: var(--gp-ink-2); font-weight: 500; }
+        .gp-add { display: inline-flex; align-items: center; gap: 9px; padding: 13px 24px; border-radius: 15px; color: #fff !important; background: var(--gp-ink); font-size: .92rem; font-weight: 700; text-decoration: none; box-shadow: 0 16px 28px -14px rgba(3,35,37,.9); transition: transform .15s ease; }
+        .gp-add:hover { transform: translateY(-2px); }
+        .gp-gem { position: absolute; right: clamp(10px, 4vw, 60px); bottom: -34px; width: clamp(150px, 20vw, 260px); pointer-events: none; }
+        .gp-gem path { fill: rgba(255,255,255,.22); stroke: rgba(3,35,37,.28); stroke-width: 1.5; stroke-linejoin: round; }
+        .gp-stats { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 22px; }
+        .gp-stat { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 12px 16px; border: 1px solid rgba(255,255,255,.6); border-radius: 18px; background: rgba(255,255,255,.42); backdrop-filter: blur(8px); }
+        .gp-stat-icon { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 13px; color: var(--gp-teal-ink); background: #fff; }
+        .gp-stat strong { display: block; color: var(--gp-ink); font: 700 1.9rem/1 "Plus Jakarta Sans", sans-serif; font-variant-numeric: tabular-nums; }
+        .gp-stat span { display: block; color: var(--gp-ink-2); font-size: .76rem; font-weight: 700; }
+
+        .gp-panel { margin-top: 20px; overflow: hidden; border: 1px solid var(--gp-line); border-radius: 28px; background: var(--gp-paper); box-shadow: 0 30px 60px -40px rgba(0,143,145,.7); }
+        .gp-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 14px 18px; border-bottom: 1px solid var(--gp-line); }
+        .gp-search { position: relative; flex: 1 1 230px; min-width: 190px; max-width: 360px; }
+        .gp-search i { position: absolute; top: 50%; left: 13px; color: var(--gp-teal-lo); pointer-events: none; transform: translateY(-50%); }
+        .gp-search input, .gp-select { min-height: 40px; border: 1px solid var(--gp-line); border-radius: 12px; color: var(--gp-text); background: #f8fcfc; font-size: .84rem; transition: border-color .15s ease, box-shadow .15s ease; }
+        .gp-search input { width: 100%; padding: 9px 12px 9px 36px; }
+        .gp-select { max-width: 200px; padding: 9px 12px; cursor: pointer; }
+        .gp-search input:focus, .gp-select:focus { border-color: var(--gp-teal); outline: 0; background: #fff; box-shadow: 0 0 0 4px rgba(0,180,182,.18); }
+        .gp-segments { display: flex; gap: 3px; padding: 4px; border: 1px solid var(--gp-line); border-radius: 13px; background: #f1f8f8; }
+        .gp-segments button { padding: 7px 10px; border: 0; border-radius: 9px; color: var(--gp-muted); background: transparent; font-size: .77rem; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background .15s ease, color .15s ease; }
+        .gp-segments button:hover { color: var(--gp-text); }
+        .gp-segments button[aria-pressed="true"] { color: var(--gp-ink); background: linear-gradient(135deg, var(--gp-teal-hi), var(--gp-teal)); font-weight: 700; box-shadow: 0 6px 14px -8px rgba(0,143,145,.9); }
+        .gp-view-toggle { display: flex; gap: 3px; padding: 4px; border: 1px solid var(--gp-line); border-radius: 13px; background: #f1f8f8; }
+        .gp-view-toggle button { padding: 7px 10px; border: 0; border-radius: 9px; color: var(--gp-muted); background: transparent; font-size: .77rem; font-weight: 600; cursor: pointer; }
+        .gp-view-toggle button[aria-pressed="true"] { color: var(--gp-ink); background: linear-gradient(135deg, var(--gp-teal-hi), var(--gp-teal)); box-shadow: 0 6px 14px -8px rgba(0,143,145,.9); }
+        .gp-count { margin-left: auto; color: var(--gp-muted); font-size: .8rem; white-space: nowrap; }
+
+        .gp-scroll { overflow-x: auto; }
+        body.admin-app .gp-main table.gp-table { width: 100%; min-width: 980px; margin: 0; overflow: visible; border: 0; border-radius: 0; border-collapse: collapse; background: transparent; box-shadow: none; }
+        .gp-table th { padding: 11px 12px; border: 0; border-bottom: 1px solid var(--gp-line); color: var(--gp-muted); background: #f6fbfb; font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-align: left; text-transform: uppercase; white-space: nowrap; }
+        .gp-table td { padding: 11px 12px; border: 0; border-bottom: 1px solid #e8f1f1; color: var(--gp-text); background: transparent; font-size: .82rem; vertical-align: middle; }
+        .gp-table th:first-child, .gp-table td:first-child { padding-left: 18px; }
+        .gp-table th:last-child, .gp-table td:last-child { padding-right: 18px; }
+        .gp-table tbody tr:last-child td { border-bottom: 0; }
+        .gp-table tbody tr { transition: background-color .15s ease; }
+        .gp-table tbody tr:hover { background: rgba(0,180,182,.06); }
+        .gp-right { text-align: right !important; }
+        .gp-sort { display: inline-flex; align-items: center; gap: 6px; padding: 2px 4px; border: 0; border-radius: 8px; color: inherit; background: transparent; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
+        .gp-sort:hover, .gp-table th[aria-sort]:not([aria-sort="none"]) .gp-sort { color: var(--gp-ink); }
+        .gp-sort i { font-size: .67rem; opacity: .55; }
+        .gp-table th[aria-sort="ascending"] .gp-sort i { opacity: 1; color: var(--gp-teal-lo); }
+        .gp-product { display: flex; align-items: center; gap: 11px; min-width: 230px; }
+        .gp-thumb { flex: none; width: 100px; height: 100px; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--gp-line); border-radius: 12px; color: var(--gp-teal-ink); background: linear-gradient(135deg, #d9f4f1, #8de0d4); box-shadow: 0 8px 16px -12px rgba(3,35,37,.6); }
+        .gp-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+        .gp-thumb-fallback { display: none; place-items: center; width: 100%; height: 100%; }
+        .gp-product-name { display: block; max-width: 260px; overflow-wrap: anywhere; color: var(--gp-ink); font: 700 1rem/1.05 "Plus Jakarta Sans", sans-serif; }
+        .gp-product-id { display: inline-flex; align-items: center; gap: 4px; margin-top: 3px; padding: 0; border: 0; color: var(--gp-muted); background: transparent; font-size: .67rem; cursor: pointer; }
+        .gp-product-id:hover { color: var(--gp-teal-ink); }
+        .gp-category { display: inline-block; padding: 3px 10px; border: 1px solid var(--gp-line); border-radius: 99px; color: var(--gp-teal-ink); background: var(--gp-bg); font-size: .7rem; font-weight: 700; white-space: nowrap; }
+        .gp-price { color: var(--gp-ink); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .gp-stock { display: inline-block; min-width: 34px; padding: 3px 9px; border-radius: 99px; color: var(--gp-ok); background: var(--gp-ok-bg); font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+        .gp-stock.is-empty { color: var(--gp-red); background: var(--gp-red-bg); }
+        .gp-stock.is-low { color: var(--gp-amber); background: var(--gp-amber-bg); }
+        .gp-stock-bar { display: block; width: 56px; height: 3px; margin: 5px 0 0 auto; overflow: hidden; border-radius: 4px; background: var(--gp-line); }
+        .gp-stock-bar span { display: block; width: var(--stock-progress); height: 100%; background: linear-gradient(90deg, var(--gp-teal-hi), var(--gp-teal)); }
+        .gp-warehouse { display: inline-flex; align-items: center; gap: 7px; }
+        .gp-warehouse-amount { color: var(--gp-amber); font-weight: 800; font-variant-numeric: tabular-nums; }
+        .gp-zero { color: #9bb0b2; font-weight: 600; }
+        .gp-transfer { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border: 1px solid var(--gp-line); border-radius: 99px; color: var(--gp-teal-ink); background: #fff; font-size: .66rem; font-weight: 700; white-space: nowrap; cursor: pointer; transition: background .15s ease, border-color .15s ease; }
+        .gp-transfer:hover { border-color: var(--gp-teal); background: var(--gp-teal); }
+        .gp-featured { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 99px; color: var(--gp-muted); background: #e9f0f0; font-size: .7rem; font-weight: 700; }
+        .gp-featured.is-featured { color: #4a3300; background: linear-gradient(135deg, var(--gp-gold-hi), var(--gp-gold)); }
+        .gp-actions { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .gp-actions form { display: inline-flex; margin: 0; }
+        .gp-button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-height: 29px; padding: 5px 9px; border: 1px solid var(--gp-line); border-radius: 9px; color: var(--gp-ink-2); background: #fff; font-size: .69rem; font-weight: 700; text-decoration: none !important; white-space: nowrap; cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease, transform .15s ease; }
+        .gp-button:hover { border-color: var(--gp-teal); color: var(--gp-ink); background: #e9f8f6; transform: translateY(-1px); }
+        .gp-button.is-delete { border-color: #f0c4be; color: var(--gp-red); background: var(--gp-red-bg); }
+        .gp-button.is-delete:hover { border-color: var(--gp-red); color: #fff; background: var(--gp-red); }
+
+        .gp-gallery { display: none; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; padding: 18px; }
+        .gp-card { display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--gp-line); border-radius: 20px; background: #fff; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+        .gp-card:hover { border-color: var(--gp-teal); box-shadow: 0 22px 36px -24px rgba(0,143,145,.8); transform: translateY(-4px); }
+        .gp-card-image { position: relative; aspect-ratio: 1 / .78; overflow: hidden; background: linear-gradient(135deg, #d9f4f1, #8de0d4); }
+        .gp-card-image .gp-thumb { width: 100%; height: 100%; border: 0; border-radius: 0; box-shadow: none; }
+        .gp-card-image .gp-thumb-fallback { font-size: 2rem; }
+        .gp-card-label { position: absolute; top: 11px; left: 11px; padding: 4px 10px; border-radius: 99px; color: var(--gp-teal-ink); background: rgba(255,255,255,.94); font-size: .7rem; font-weight: 700; }
+        .gp-card-star { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; color: #4a3300; background: linear-gradient(135deg, var(--gp-gold-hi), var(--gp-gold)); }
+        .gp-card-body { display: flex; flex: 1; flex-direction: column; gap: 9px; padding: 14px; }
+        .gp-card-body h2 { margin: 0; color: var(--gp-ink); font: 700 1.28rem/1.05 "Playfair Display", Georgia, serif; overflow-wrap: anywhere; }
+        .gp-card-price { color: var(--gp-teal-ink); font-size: 1.05rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+        .gp-card-stock { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 10px; border-radius: 12px; color: var(--gp-muted); background: #f6fbfb; font-size: .75rem; font-weight: 600; }
+        .gp-card-stock > span { display: flex; align-items: center; gap: 6px; }
+        .gp-card-id { align-self: flex-start; }
+        .gp-card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: auto; }
+        .gp-card-actions .gp-button, .gp-card-actions form, .gp-card-actions form .gp-button { width: 100%; }
+        .gp-view-gallery .gp-gallery { display: grid; }
+        .gp-view-gallery .gp-scroll { display: none; }
+        .gp-empty { display: none; padding: 42px 18px; color: var(--gp-muted); text-align: center; }
+        .gp-empty i { display: block; margin-bottom: 10px; color: var(--gp-teal); font-size: 1.6rem; }
+        .gp-footer { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 12px 18px; border-top: 1px solid var(--gp-line); color: var(--gp-muted); background: #f6fbfb; font-size: .77rem; }
+
+        .gp-dialog { width: min(430px, calc(100% - 32px)); padding: 24px; border: 1px solid var(--gp-line); border-radius: 22px; color: var(--gp-text); background: #fff; box-shadow: 0 40px 80px -20px rgba(3,35,37,.55); }
+        .gp-dialog::backdrop { background: rgba(3,35,37,.55); backdrop-filter: blur(3px); }
+        .gp-dialog h2 { margin: 0 0 5px; color: var(--gp-ink); font: 700 1.7rem/1.1 "Playfair Display", Georgia, serif; }
+        .gp-dialog p { margin: 0 0 16px; color: var(--gp-muted); }
+        .gp-dialog label { display: block; margin-bottom: 6px; font-size: .85rem; font-weight: 700; }
+        .gp-dialog input { width: 100%; min-height: 42px; margin-bottom: 16px; padding: 9px 12px; border: 1px solid var(--gp-line); border-radius: 10px; }
+        .gp-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
+        .gp-dialog-actions .gp-button.is-primary { border-color: var(--gp-teal); color: var(--gp-ink); background: linear-gradient(135deg, var(--gp-teal-hi), var(--gp-teal)); }
+
+        @media (max-width: 1100px) { .gp-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 1024px) { body.admin-app:not(.lje-admin-dashboard) main.admin-main-content.gp-main { padding-top: 70px; } }
+        @media (max-width: 760px) {
+            body.admin-app:not(.lje-admin-dashboard) main.admin-main-content.gp-main { padding: 68px 12px 32px; }
+            .gp-banner { padding: 20px 16px; border-radius: 22px; }
+            .gp-banner-top { align-items: flex-start; }
+            .gp-banner h1 { font-size: 2.3rem; }
+            .gp-add { padding: 10px 14px; }
+            .gp-stats { gap: 8px; margin-top: 16px; }
+            .gp-stat { gap: 8px; padding: 9px; border-radius: 14px; }
+            .gp-stat-icon { width: 32px; height: 32px; border-radius: 10px; }
+            .gp-stat strong { font-size: 1.5rem; }
+            .gp-stat span { font-size: .67rem; }
+            .gp-panel { border-radius: 20px; }
+            .gp-tools { padding: 12px; }
+            .gp-search { flex-basis: 100%; max-width: none; }
+            .gp-select { flex: 1; max-width: none; }
+            .gp-segments { flex: 1; justify-content: space-between; }
+            .gp-segments button { flex: 1; padding-inline: 5px; font-size: .7rem; }
+            .gp-view-toggle { margin-left: auto; }
+            .gp-count { width: 100%; margin-left: 0; }
+            .gp-table { min-width: 0 !important; }
+            .gp-table thead { display: none; }
+            body.admin-app .gp-main table.gp-table,
+            .gp-table tbody, .gp-table tr, .gp-table td { display: block; }
+            .gp-table tr[data-product-row] { padding: 13px 15px; border-bottom: 1px solid var(--gp-line); }
+            .gp-table tr[data-product-row]:last-child { border-bottom: 0; }
+            .gp-table td { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 5px 0; border: 0; text-align: right; }
+            .gp-table td::before { content: attr(data-label); color: var(--gp-muted); font-size: .65rem; font-weight: 700; letter-spacing: .06em; text-align: left; text-transform: uppercase; }
+            .gp-table td.gp-product-cell { display: block; padding-bottom: 9px; text-align: left; }
+            .gp-table td.gp-product-cell::before { display: none; }
+            .gp-table td.gp-action-cell { justify-content: flex-end; }
+            .gp-table td.gp-action-cell::before { margin-right: auto; }
+            .gp-stock-bar { margin-left: auto; }
+            .gp-actions { justify-content: flex-end; }
+        }
+        @media (max-width: 400px) {
+            .gp-stat { align-items: flex-start; flex-direction: column; }
+            .gp-segments button { font-size: .64rem; }
+            .gp-view-toggle button { padding-inline: 7px; font-size: .68rem; }
+        }
+        @media (prefers-reduced-motion: reduce) { body.admin-app .gp-main *, body.admin-app .gp-main *::before, body.admin-app .gp-main *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+    </style>
+</head>
+<body class="admin-app">
+<div class="admin-container">
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar}"></aside>
+
+    <main class="main-content admin-main-content gp-main">
+        <section class="gp-banner" aria-labelledby="products-title">
+            <svg class="gp-gem" viewBox="0 0 200 200" aria-hidden="true">
+                <path d="M50 50h100l40 55-90 90L10 105z"></path>
+                <path d="M10 105h180M50 50l50 55 50-55M100 105v90"></path>
+            </svg>
+            <div class="gp-banner-top">
+                <div>
+                    <h1 id="products-title">Gestión de productos</h1>
+                    <p>Catálogo, stock de tienda y bodega en un solo lugar.</p>
+                </div>
+                <a class="gp-add" th:href="@{/admin/productos/nuevo}">
+                    <i class="fas fa-plus" aria-hidden="true"></i> Añadir producto
+                </a>
+            </div>
+
+            <div class="gp-stats" aria-label="Resumen del inventario">
+                <article class="gp-stat">
+                    <i class="gp-stat-icon fas fa-box-open" aria-hidden="true"></i>
+                    <div><strong th:text="${totalProductos}">0</strong><span>Productos en la lista</span></div>
+                </article>
+                <article class="gp-stat">
+                    <i class="gp-stat-icon fas fa-star" aria-hidden="true"></i>
+                    <div><strong th:text="${totalDestacados}">0</strong><span>Destacados</span></div>
+                </article>
+                <article class="gp-stat">
+                    <i class="gp-stat-icon fas fa-triangle-exclamation" aria-hidden="true"></i>
+                    <div><strong th:text="${productosSinStock}">0</strong><span>Sin stock en tienda</span></div>
+                </article>
+                <article class="gp-stat">
+                    <i class="gp-stat-icon fas fa-warehouse" aria-hidden="true"></i>
+                    <div><strong th:text="${#numbers.formatInteger(unidadesBodega, 1, 'POINT')}">0</strong><span>Unidades en bodega</span></div>
+                </article>
+            </div>
+        </section>
+
+        <div th:if="${success}" class="alert alert-success" role="status" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" role="alert" th:text="${error}"></div>
+
+        <section class="gp-panel" id="productPanel" aria-label="Catálogo de productos">
+            <div class="gp-tools">
+                <label class="gp-search">
+                    <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                    <input id="productSearch" type="search" placeholder="Buscar por nombre, ID o categoría..." autocomplete="off" aria-label="Buscar productos">
+                </label>
+
+                <select id="categoryFilter" class="gp-select" aria-label="Filtrar por categoría">
+                    <option value="">Todas las categorías</option>
+                    <option th:each="categoria : ${categorias}" th:value="${categoria}" th:text="${categoria}"></option>
+                </select>
+
+                <select id="productSort" class="gp-select" aria-label="Ordenar productos">
+                    <option value="">Orden predeterminado</option>
+                    <option value="name-asc">Nombre: A-Z</option>
+                    <option value="name-desc">Nombre: Z-A</option>
+                    <option value="date-asc">Fecha: más antigua primero</option>
+                    <option value="date-desc">Fecha: más reciente primero</option>
+                </select>
+
+                <div class="gp-segments" id="quickFilters" role="group" aria-label="Filtros rápidos">
+                    <button type="button" data-filter="all" aria-pressed="true">Todos</button>
+                    <button type="button" data-filter="featured" aria-pressed="false">Destacados</button>
+                    <button type="button" data-filter="out" aria-pressed="false">Sin stock</button>
+                    <button type="button" data-filter="warehouse" aria-pressed="false">Con bodega</button>
+                </div>
+
+                <div class="gp-view-toggle" id="viewToggle" role="group" aria-label="Cambiar presentación">
+                    <button type="button" data-view="table" aria-pressed="true"><i class="fas fa-table-list" aria-hidden="true"></i> Tabla</button>
+                    <button type="button" data-view="gallery" aria-pressed="false"><i class="fas fa-grip" aria-hidden="true"></i> Galería</button>
+                </div>
+
+                <span class="gp-count" id="productCount" aria-live="polite">0 de 0 productos</span>
+            </div>
+
+            <div class="gp-scroll">
+                <table class="gp-table">
+                    <thead>
+                    <tr>
+                        <th data-sort="name" aria-sort="none"><button class="gp-sort" type="button">Producto <i class="fas fa-sort" aria-hidden="true"></i></button></th>
+                        <th data-sort="category" aria-sort="none"><button class="gp-sort" type="button">Categoría <i class="fas fa-sort" aria-hidden="true"></i></button></th>
+                        <th class="gp-right" data-sort="price" aria-sort="none"><button class="gp-sort" type="button">Precio <i class="fas fa-sort" aria-hidden="true"></i></button></th>
+                        <th class="gp-right" data-sort="store" aria-sort="none"><button class="gp-sort" type="button">Tienda <i class="fas fa-sort" aria-hidden="true"></i></button></th>
+                        <th class="gp-right" data-sort="warehouse" aria-sort="none"><button class="gp-sort" type="button">Bodega <i class="fas fa-sort" aria-hidden="true"></i></button></th>
+                        <th>Destacado</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="productRows">
+                    <tr th:each="producto : ${productos}"
+                        data-product-row
+                        th:attr="data-id=${producto.id},data-name=${producto.nombre},data-category=${producto.categoria},data-price=${producto.precio},data-store=${producto.stock},data-warehouse=${producto.stockProveedor > producto.stock ? producto.stockProveedor - producto.stock : 0},data-featured=${producto.destacado},data-date=${producto.fechaOferta}">
+                        <td class="gp-product-cell" data-label="Producto">
+                            <div class="gp-product">
+                                <span class="gp-thumb">
+                                    <img th:if="${producto.imagen != null and !#strings.isEmpty(producto.imagen)}" th:src="${producto.imagen}" th:alt="${producto.nombre}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.style.display='grid'">
+                                    <span class="gp-thumb-fallback" th:style="${producto.imagen == null or #strings.isEmpty(producto.imagen) ? 'display:grid' : ''}"><i class="fas fa-gem" aria-hidden="true"></i></span>
+                                </span>
+                                <div>
+                                    <span class="gp-product-name" th:text="${producto.nombre}">Producto</span>
+                                    <button class="gp-product-id" type="button" th:data-copy-id="${producto.id}" th:attr="aria-label=${'Copiar ID ' + producto.id}">
+                                        <span th:text="${'ID ' + #strings.substring(producto.id, 0, producto.id.length() > 7 ? 7 : producto.id.length())}">ID producto</span><i class="fas fa-copy" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                        <td data-label="Categoría"><span class="gp-category" th:text="${producto.categoria}">Categoría</span></td>
+                        <td class="gp-right gp-price" data-label="Precio" th:text="${'COP $ ' + #numbers.formatDecimal(producto.precio, 1, 'POINT', 0, 'COMMA')}">COP $ 0</td>
+                        <td class="gp-right" data-label="Tienda">
+                            <span class="gp-stock" th:classappend="${producto.stock <= 0 ? ' is-empty' : (producto.stock < 10 ? ' is-low' : '')}" th:text="${#numbers.formatInteger(producto.stock, 1, 'POINT')}">0</span>
+                            <span class="gp-stock-bar"><span th:style="${'--stock-progress:' + (producto.stock > 100 ? 100 : producto.stock) + '%'}"></span></span>
+                            <button th:if="${producto.stock > 0}" class="gp-transfer" type="button" th:data-product-id="${producto.id}" th:data-product-name="${producto.nombre}" th:data-store-stock="${producto.stock}" data-transfer-direction="down" aria-label="Bajar inventario a bodega">
+                                <i class="fas fa-arrow-down" aria-hidden="true"></i> Bajar
+                            </button>
+                        </td>
+                        <td class="gp-right" data-label="Bodega">
+                            <span class="gp-warehouse" th:with="bodega=${producto.stockProveedor > producto.stock ? producto.stockProveedor - producto.stock : 0}">
+                                <strong th:if="${bodega > 0}" class="gp-warehouse-amount" th:text="${#numbers.formatInteger(bodega, 1, 'POINT')}">0</strong>
+                                <span th:unless="${bodega > 0}" class="gp-zero">0</span>
+                                <button th:if="${bodega > 0}" class="gp-transfer" type="button" th:data-product-id="${producto.id}" th:data-product-name="${producto.nombre}" th:data-warehouse-stock="${bodega}">
+                                    <i class="fas fa-arrow-up" aria-hidden="true"></i> Subir
+                                </button>
+                            </span>
+                        </td>
+                        <td data-label="Destacado">
+                            <span th:if="${producto.destacado}" class="gp-featured is-featured"><i class="fas fa-star" aria-hidden="true"></i> Sí</span>
+                            <span th:unless="${producto.destacado}" class="gp-featured">No</span>
+                        </td>
+                        <td class="gp-action-cell" data-label="Acciones">
+                            <div class="gp-actions">
+                                <a class="gp-button" th:href="@{/admin/productos/editar/{id}(id=${producto.id})}"><i class="fas fa-pen-to-square" aria-hidden="true"></i> Editar</a>
+                                <form th:action="@{/admin/productos/eliminar/{id}(id=${producto.id})}" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este producto?');">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <button class="gp-button is-delete" type="submit"><i class="fas fa-trash" aria-hidden="true"></i> Eliminar</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="gp-gallery" id="productGallery">
+                <article class="gp-card" th:each="producto : ${productos}"
+                         data-product-card
+                         th:attr="data-id=${producto.id},data-name=${producto.nombre},data-category=${producto.categoria},data-price=${producto.precio},data-store=${producto.stock},data-warehouse=${producto.stockProveedor > producto.stock ? producto.stockProveedor - producto.stock : 0},data-featured=${producto.destacado},data-date=${producto.fechaOferta}">
+                    <div class="gp-card-image">
+                        <span class="gp-thumb">
+                            <img th:if="${producto.imagen != null and !#strings.isEmpty(producto.imagen)}" th:src="${producto.imagen}" th:alt="${producto.nombre}" loading="lazy" onerror="this.hidden=true;this.nextElementSibling.style.display='grid'">
+                            <span class="gp-thumb-fallback" th:style="${producto.imagen == null or #strings.isEmpty(producto.imagen) ? 'display:grid' : ''}"><i class="fas fa-gem" aria-hidden="true"></i></span>
+                        </span>
+                        <span class="gp-card-label" th:text="${producto.categoria}">Categoría</span>
+                        <span th:if="${producto.destacado}" class="gp-card-star" aria-label="Producto destacado"><i class="fas fa-star" aria-hidden="true"></i></span>
+                    </div>
+                    <div class="gp-card-body">
+                        <h2 th:text="${producto.nombre}">Producto</h2>
+                        <div class="gp-card-price" th:text="${'COP $ ' + #numbers.formatDecimal(producto.precio, 1, 'POINT', 0, 'COMMA')}">COP $ 0</div>
+                        <div class="gp-card-stock">
+                            <span>Tienda <strong class="gp-stock" th:classappend="${producto.stock <= 0 ? ' is-empty' : (producto.stock < 10 ? ' is-low' : '')}" th:text="${#numbers.formatInteger(producto.stock, 1, 'POINT')}">0</strong>
+                                <button th:if="${producto.stock > 0}" class="gp-transfer" type="button" th:data-product-id="${producto.id}" th:data-product-name="${producto.nombre}" th:data-store-stock="${producto.stock}" data-transfer-direction="down" aria-label="Bajar inventario a bodega">
+                                    <i class="fas fa-arrow-down" aria-hidden="true"></i> Bajar
+                                </button>
+                            </span>
+                            <span>Bodega
+                                <span class="gp-warehouse" th:with="bodega=${producto.stockProveedor > producto.stock ? producto.stockProveedor - producto.stock : 0}">
+                                    <strong th:class="${bodega > 0 ? 'gp-warehouse-amount' : 'gp-zero'}" th:text="${#numbers.formatInteger(bodega, 1, 'POINT')}">0</strong>
+                                    <button th:if="${bodega > 0}" class="gp-transfer" type="button" th:data-product-id="${producto.id}" th:data-product-name="${producto.nombre}" th:data-warehouse-stock="${bodega}" data-transfer-direction="up" aria-label="Subir inventario a tienda">
+                                        <i class="fas fa-arrow-up" aria-hidden="true"></i> Subir
+                                    </button>
+                                </span>
+                            </span>
+                        </div>
+                        <button class="gp-product-id gp-card-id" type="button" th:data-copy-id="${producto.id}" th:attr="aria-label=${'Copiar ID ' + producto.id}">
+                            <span th:text="${'ID ' + #strings.substring(producto.id, 0, producto.id.length() > 7 ? 7 : producto.id.length())}">ID producto</span><i class="fas fa-copy" aria-hidden="true"></i>
+                        </button>
+                        <div class="gp-card-actions">
+                            <a class="gp-button" th:href="@{/admin/productos/editar/{id}(id=${producto.id})}"><i class="fas fa-pen-to-square" aria-hidden="true"></i> Editar</a>
+                            <form th:action="@{/admin/productos/eliminar/{id}(id=${producto.id})}" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este producto?');">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button class="gp-button is-delete" type="submit"><i class="fas fa-trash" aria-hidden="true"></i> Eliminar</button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <div class="gp-empty" id="emptyProducts" th:style="${#lists.isEmpty(productos) ? 'display:block' : ''}">
+                <i class="fas fa-box-open" aria-hidden="true"></i>
+                <span id="emptyMessage" th:text="${#lists.isEmpty(productos) ? 'No hay productos para mostrar.' : 'No se encontraron productos con esos filtros.'}">No hay productos para mostrar.</span>
+            </div>
+
+            <footer class="gp-footer">
+                <span id="productsSummary">Mostrando 0 de 0 productos de esta lista</span>
+                <span>Precios del catálogo (IVA incluido)</span>
+            </footer>
+        </section>
+    </main>
+</div>
+
+<dialog class="gp-dialog" id="warehouseDialog" aria-labelledby="warehouseTitle">
+    <form id="warehouseForm" method="post" th:data-move-up-base="@{/admin/productos/mover-a-tienda/}" th:data-move-down-base="@{/admin/productos/mover-a-bodega/}">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <h2 id="warehouseTitle"><i class="fas fa-warehouse" aria-hidden="true"></i> Subir de bodega a tienda</h2>
+        <p id="warehouseProductName"></p>
+        <label id="warehouseQuantityLabel" for="warehouseQuantity">Unidades a subir a tienda</label>
+        <input type="number" id="warehouseQuantity" name="cantidad" min="1" value="1" required>
+        <p id="warehouseAvailable" class="gp-warehouse-amount"></p>
+        <div class="gp-dialog-actions">
+            <button type="button" class="gp-button" id="closeWarehouseDialog">Cancelar</button>
+            <button type="submit" class="gp-button is-primary"><i id="warehouseSubmitIcon" class="fas fa-arrow-up" aria-hidden="true"></i> <span id="warehouseSubmitLabel">Subir a tienda</span></button>
+        </div>
+    </form>
+</dialog>
+
+<script>
+    (function () {
+        var panel = document.getElementById('productPanel');
+        var search = document.getElementById('productSearch');
+        var category = document.getElementById('categoryFilter');
+        var productSort = document.getElementById('productSort');
+        var rowsContainer = document.getElementById('productRows');
+        var gallery = document.getElementById('productGallery');
+        var count = document.getElementById('productCount');
+        var summary = document.getElementById('productsSummary');
+        var empty = document.getElementById('emptyProducts');
+        var emptyMessage = document.getElementById('emptyMessage');
+        var filter = 'all';
+        var view = 'table';
+        var sortKey = '';
+        var sortDirection = 1;
+        var rows = Array.prototype.slice.call(rowsContainer.querySelectorAll('[data-product-row]'));
+        var cards = Array.prototype.slice.call(gallery.querySelectorAll('[data-product-card]'));
+
+        function normalized(value) {
+            return (value || '').toLocaleLowerCase('es');
+        }
+
+        function matches(product) {
+            var query = normalized(search.value.trim());
+            var name = normalized(product.dataset.name);
+            var id = normalized(product.dataset.id);
+            var categoryName = product.dataset.category || '';
+            var storeStock = Number(product.dataset.store) || 0;
+            var warehouseStock = Number(product.dataset.warehouse) || 0;
+            var isFeatured = product.dataset.featured === 'true';
+
+            return (!query || name.indexOf(query) !== -1 || id.indexOf(query) !== -1 || normalized(categoryName).indexOf(query) !== -1)
+                && (!category.value || normalized(categoryName.trim()) === normalized(category.value.trim()))
+                && (filter === 'all'
+                    || (filter === 'featured' && isFeatured)
+                    || (filter === 'out' && storeStock <= 0)
+                    || (filter === 'warehouse' && warehouseStock > 0));
+        }
+
+        function compareProducts(a, b) {
+            if (!sortKey) return 0;
+            var left = a.dataset[sortKey] || '';
+            var right = b.dataset[sortKey] || '';
+            if (sortKey === 'date') {
+                if (!left && !right) return 0;
+                if (!left) return 1;
+                if (!right) return -1;
+                return sortDirection * (Date.parse(left) - Date.parse(right));
+            }
+            if (sortKey === 'price' || sortKey === 'store' || sortKey === 'warehouse') {
+                return sortDirection * ((Number(left) || 0) - (Number(right) || 0));
+            }
+            return sortDirection * left.localeCompare(right, 'es', { numeric: true, sensitivity: 'base' });
+        }
+
+        function updateSortHeaders(activeHeader) {
+            document.querySelectorAll('.gp-table th[data-sort]').forEach(function (item) {
+                var active = item === activeHeader;
+                item.setAttribute('aria-sort', active ? (sortDirection > 0 ? 'ascending' : 'descending') : 'none');
+                var icon = item.querySelector('i');
+                icon.className = active ? 'fas fa-sort-' + (sortDirection > 0 ? 'up' : 'down') : 'fas fa-sort';
+            });
+        }
+
+        function render() {
+            var orderedRows = rows.slice().sort(compareProducts);
+            var orderedCards = cards.slice().sort(compareProducts);
+            var visible = 0;
+            orderedRows.forEach(function (product) {
+                var show = matches(product);
+                product.hidden = !show;
+                if (show) visible++;
+                rowsContainer.appendChild(product);
+            });
+            orderedCards.forEach(function (product) {
+                product.hidden = !matches(product);
+                gallery.appendChild(product);
+            });
+            count.textContent = visible + ' de ' + rows.length + ' productos';
+            summary.textContent = 'Mostrando ' + visible + ' de ' + rows.length + ' productos de esta lista';
+            empty.style.display = visible ? 'none' : 'block';
+            emptyMessage.textContent = rows.length ? 'No se encontraron productos con esos filtros.' : 'No hay productos para mostrar.';
+            document.body.classList.toggle('gp-view-gallery', view === 'gallery');
+        }
+
+        search.addEventListener('input', render);
+        category.addEventListener('change', render);
+        productSort.addEventListener('change', function () {
+            var selection = this.value.split('-');
+            sortKey = selection[0] === 'name' || selection[0] === 'date' ? selection[0] : '';
+            sortDirection = selection[1] === 'desc' ? -1 : 1;
+            updateSortHeaders(sortKey === 'name' ? document.querySelector('.gp-table th[data-sort="name"]') : null);
+            render();
+        });
+
+        document.getElementById('quickFilters').addEventListener('click', function (event) {
+            var button = event.target.closest('button[data-filter]');
+            if (!button) return;
+            filter = button.dataset.filter;
+            this.querySelectorAll('button[data-filter]').forEach(function (item) {
+                item.setAttribute('aria-pressed', item === button ? 'true' : 'false');
+            });
+            render();
+        });
+
+        document.getElementById('viewToggle').addEventListener('click', function (event) {
+            var button = event.target.closest('button[data-view]');
+            if (!button) return;
+            view = button.dataset.view;
+            this.querySelectorAll('button[data-view]').forEach(function (item) {
+                item.setAttribute('aria-pressed', item === button ? 'true' : 'false');
+            });
+            render();
+        });
+
+        document.querySelectorAll('.gp-table th[data-sort]').forEach(function (header) {
+            header.querySelector('button').addEventListener('click', function () {
+                if (sortKey === header.dataset.sort) sortDirection *= -1;
+                else {
+                    sortKey = header.dataset.sort;
+                    sortDirection = 1;
+                }
+                productSort.value = sortKey === 'name'
+                    ? 'name-' + (sortDirection > 0 ? 'asc' : 'desc')
+                    : '';
+                updateSortHeaders(header);
+                render();
+            });
+        });
+
+        panel.addEventListener('click', function (event) {
+            var copyButton = event.target.closest('[data-copy-id]');
+            if (copyButton) {
+                var id = copyButton.dataset.copyId;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(id).then(function () {
+                        copyButton.querySelector('span').textContent = '¡Copiado!';
+                        window.setTimeout(function () {
+                            copyButton.querySelector('span').textContent = 'ID ' + id.substring(0, 7);
+                        }, 1300);
+                    }).catch(function () {
+                        copyButton.querySelector('span').textContent = 'No copiado';
+                        window.setTimeout(function () {
+                            copyButton.querySelector('span').textContent = 'ID ' + id.substring(0, 7);
+                        }, 1300);
+                    });
+                }
+                return;
+            }
+
+            var transferButton = event.target.closest('[data-product-id]');
+            if (!transferButton) return;
+            var dialog = document.getElementById('warehouseDialog');
+            var form = document.getElementById('warehouseForm');
+            var quantity = document.getElementById('warehouseQuantity');
+            var direction = transferButton.dataset.transferDirection || 'up';
+            var isDown = direction === 'down';
+            var available = Number(isDown ? transferButton.dataset.storeStock : transferButton.dataset.warehouseStock);
+            document.getElementById('warehouseTitle').lastChild.textContent = isDown
+                ? ' Bajar de tienda a bodega'
+                : ' Subir de bodega a tienda';
+            document.getElementById('warehouseProductName').textContent = transferButton.dataset.productName;
+            document.getElementById('warehouseQuantityLabel').textContent = isDown
+                ? 'Unidades a bajar a bodega'
+                : 'Unidades a subir a tienda';
+            document.getElementById('warehouseAvailable').textContent = (isDown ? 'Disponible en tienda: ' : 'Disponible en bodega: ')
+                + available.toLocaleString('es-CO') + ' unidades';
+            quantity.max = String(available);
+            quantity.value = '1';
+            form.action = (isDown ? form.dataset.moveDownBase : form.dataset.moveUpBase)
+                + encodeURIComponent(transferButton.dataset.productId);
+            document.getElementById('warehouseSubmitIcon').className = isDown ? 'fas fa-arrow-down' : 'fas fa-arrow-up';
+            document.getElementById('warehouseSubmitLabel').textContent = isDown ? 'Bajar a bodega' : 'Subir a tienda';
+            dialog.showModal();
+            quantity.focus();
+        });
+
+        document.getElementById('closeWarehouseDialog').addEventListener('click', function () {
+            document.getElementById('warehouseDialog').close();
+        });
+        document.getElementById('warehouseDialog').addEventListener('click', function (event) {
+            if (event.target === this) this.close();
+        });
+
+        render();
+    }());
+</script>
+</body>
+</html>

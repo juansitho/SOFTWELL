@@ -1,0 +1,17 @@
+﻿producto,categoria,semana_inicio,semana_fin,demanda_estimada,stock_actual,unidades_a_reponer,alerta
+Aretes Argolla Oro,Aretes,2026-11-02,2026-11-08,8.2,37,0,OK
+Pulsera Charms,Pulseras,2026-11-02,2026-11-08,4.6,7,0,OK
+Collar Corazón,Collares,2026-11-02,2026-11-08,4.4,26,0,OK
+Anillo Corazón Rosa,Anillos,2026-11-02,2026-11-08,3.2,39,0,REVISAR: posible exceso de inventario
+Aretes Perla,Aretes,2026-11-02,2026-11-08,3.1,37,0,REVISAR: posible exceso de inventario
+Aretes Gota Cristal,Aretes,2026-11-02,2026-11-08,3.0,22,0,OK
+Collar Brillante,Collares,2026-11-02,2026-11-08,2.6,5,0,OK
+Pulsera Rosa,Pulseras,2026-11-02,2026-11-08,2.0,27,0,REVISAR: posible exceso de inventario
+Pulsera Tennis,Pulseras,2026-11-02,2026-11-08,2.0,33,0,REVISAR: posible exceso de inventario
+Collar Perla,Collares,2026-11-02,2026-11-08,1.9,7,0,OK
+Anillo Blanco,Anillos,2026-11-02,2026-11-08,1.9,31,0,REVISAR: posible exceso de inventario
+Collar Diamante,Collares,2026-11-02,2026-11-08,1.8,6,0,OK
+Pulsera Hilo Dorado,Pulseras,2026-11-02,2026-11-08,1.7,13,0,OK
+Anillo Estrellas,Anillos,2026-11-02,2026-11-08,1.6,33,0,REVISAR: posible exceso de inventario
+Aretes Blanco,Aretes,2026-11-02,2026-11-08,1.5,31,0,REVISAR: posible exceso de inventario
+Anillo Solitario Oro Blanco,Anillos,2026-11-02,2026-11-08,1.2,10,0,REVISAR: posible exceso de inventario

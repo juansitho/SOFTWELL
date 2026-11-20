@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon-32.ico}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analítica - Admin</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        .an-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 24px; margin-bottom: 24px; }
+        .an-card { background: #fff; border-radius: 12px; padding: 22px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); min-width: 0; }
+        .an-card.full { grid-column: 1 / -1; }
+        .an-card h2 { font-size: 1.1rem; margin: 0 0 4px; }
+        .an-card .sub { font-size: 0.82rem; color: #777; margin-bottom: 14px; }
+        .an-chart { position: relative; height: 240px; }
+        .an-chart.tall { height: 380px; }
+        .an-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .an-kpi { min-width: 0; background: #fff; border-radius: 12px; padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .an-kpi span { display: block; font-size: 0.8rem; color: #777; }
+        .an-kpi strong { display: block; font-size: clamp(1.15rem, 1.6vw, 1.6rem); line-height: 1.25; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+        @media (max-width: 1100px) { .an-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media (max-width: 760px) { .an-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } .an-kpi { padding: 14px; } }
+        @media (max-width: 460px) { .an-kpis { grid-template-columns: 1fr; } }
+        .an-insights { background: #f3f8ff; border-left: 4px solid #1565c0; border-radius: 8px; padding: 14px 20px; margin-bottom: 24px; }
+        .an-insights h2 { font-size: 1rem; margin: 0 0 8px; color: #1565c0; }
+        .an-insights li { margin: 4px 0; font-size: 0.92rem; }
+        .an-empty { color: #999; text-align: center; padding: 30px; }
+        .tag { display:inline-block; padding:2px 10px; border-radius:12px; font-size:0.78rem; font-weight:600; color:#fff; }
+        .an-actions { display:flex; gap:10px; align-items:center; }
+        .pd-aviso { background:#fff8e1; border-left:4px solid #f9a825; border-radius:8px; padding:10px 16px; margin:10px 0; font-size:0.86rem; }
+        .pd-kpis { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin:14px 0; }
+        .pd-kpis div { background:#f7f7fa; border-radius:10px; padding:10px 14px; }
+        .pd-kpis span { display:block; font-size:0.78rem; color:#777; }
+        .pd-kpis strong { font-size:1.35rem; }
+        .pd-leader { background:#eef7ff; border-left:4px solid #1565c0; border-radius:8px; padding:14px 18px; margin:14px 0; }
+    </style>
+</head>
+<body class="admin-app">
+
+<div class="admin-container">
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar}"></aside>
+
+    <main class="main-content admin-main-content">
+        <header class="admin-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <h1><i class="fas fa-chart-pie"></i> Analítica y Minería de Datos</h1>
+            <div class="an-actions">
+                <a th:href="@{/admin/analitica/export.csv}" class="btn btn-ghost">
+                    <i class="fas fa-file-csv"></i> Exportar dataset (CSV)
+                </a>
+            </div>
+        </header>
+
+        <section class="content-section active" id="analitica"
+                 th:attr="data-url=@{/admin/analitica/datos}">
+
+            <div id="estado" class="an-empty">Cargando datos...</div>
+
+            <div id="contenido" style="display:none;">
+
+                <div class="an-kpis" id="kpis"></div>
+
+                <div class="an-insights" id="hallazgos-box" style="display:none;">
+                    <h2><i class="fas fa-lightbulb"></i> Hallazgos automáticos</h2>
+                    <ul id="hallazgos"></ul>
+                </div>
+
+                <!-- ============ VISUALIZACIÓN DE DATOS ============ -->
+                <div class="an-grid">
+                    <div class="an-card full">
+                        <h2>Ingresos mensuales, tendencia y pronóstico</h2>
+                        <div class="sub" id="sub-regresion">Regresión lineal sobre los ingresos de pedidos PAGADOS.</div>
+                        <div class="an-chart tall"><canvas id="ch-ventas"></canvas></div>
+                    </div>
+
+                    <div class="an-card">
+                        <h2>Estado de los pedidos</h2>
+                        <div class="sub">Distribución de todos los pedidos.</div>
+                        <div class="an-chart"><canvas id="ch-estados"></canvas></div>
+                    </div>
+
+                    <div class="an-card">
+                        <h2>Pedidos por día de la semana</h2>
+                        <div class="sub">¿Qué días se compra más?</div>
+                        <div class="an-chart"><canvas id="ch-dias"></canvas></div>
+                    </div>
+
+                    <div class="an-card">
+                        <h2>Ingresos por categoría</h2>
+                        <div class="sub">Estimado con el precio actual de cada producto.</div>
+                        <div class="an-chart"><canvas id="ch-categorias"></canvas></div>
+                    </div>
+
+                    <div class="an-card">
+                        <h2>Margen promedio por categoría (%)</h2>
+                        <div class="sub">(precio − costo proveedor) / precio, solo productos aceptados.</div>
+                        <div class="an-chart"><canvas id="ch-margen"></canvas></div>
+                    </div>
+
+                    <div class="an-card full">
+                        <h2>Análisis de Pareto (ABC) de productos</h2>
+                        <div class="sub" id="sub-pareto">A = productos que acumulan el 80% de los ingresos, B = hasta 95%, C = el resto.</div>
+                        <div class="an-chart tall"><canvas id="ch-pareto"></canvas></div>
+                    </div>
+
+                    <div class="an-card full">
+                        <h2><i class="fas fa-trophy"></i> Productos más comprados</h2>
+                        <div class="sub">Top 10 por unidades en pedidos pagados registrados.</div>
+                        <div id="top-productos-vacio" class="an-empty" style="display:none;">Aún no hay productos vendidos en pedidos pagados.</div>
+                        <div style="overflow-x:auto;">
+                            <table class="admin-table" id="tabla-top-productos">
+                                <thead>
+                                    <tr><th>#</th><th>Producto</th><th>Unidades compradas</th><th>Ingresos estimados*</th></tr>
+                                </thead>
+                                <tbody id="cuerpo-top-productos"></tbody>
+                            </table>
+                        </div>
+                        <div class="sub">* Ingresos estimados con el precio actual del catálogo.</div>
+                    </div>
+                </div>
+
+                <!-- ============ MINERÍA DE DATOS ============ -->
+                <div class="an-grid">
+                    <div class="an-card full">
+                        <h2><i class="fas fa-project-diagram"></i> Segmentación de clientes (RFM + K-Means)</h2>
+                        <div class="sub">Cada burbuja es un cliente: eje X = días desde su última compra (recencia),
+                            eje Y = total gastado (monetario), tamaño = número de compras (frecuencia).</div>
+                        <div id="seg-vacio" class="an-empty" style="display:none;"></div>
+                        <div id="seg-ok">
+                            <div class="an-chart tall"><canvas id="ch-segmentos"></canvas></div>
+                            <table class="admin-table" style="margin-top:20px;">
+                                <thead>
+                                    <tr><th>Segmento</th><th>Clientes</th><th>Recencia prom. (días)</th>
+                                        <th>Frecuencia prom.</th><th>Monto prom.</th><th>Monto total</th></tr>
+                                </thead>
+                                <tbody id="tabla-segmentos"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="an-card">
+                        <h2>Método del codo</h2>
+                        <div class="sub">Inercia del K-Means para k = 1…6. El "codo" sugiere cuántos grupos usar.</div>
+                        <div class="an-chart"><canvas id="ch-codo"></canvas></div>
+                    </div>
+
+                    <div class="an-card">
+                        <h2><i class="fas fa-shopping-basket"></i> Reglas de asociación</h2>
+                        <div class="sub" id="sub-reglas"></div>
+                        <div id="reglas-vacio" class="an-empty" style="display:none;">
+                            Aún no hay suficientes pedidos con 2 o más productos para encontrar reglas.
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table class="admin-table" id="tabla-reglas">
+                                <thead>
+                                    <tr><th>Si compra…</th><th>…también compra</th><th>Soporte</th><th>Confianza</th><th>Lift</th></tr>
+                                </thead>
+                                <tbody id="cuerpo-reglas"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ============ PREDICCIÓN DE DEMANDA (MODELO ENTRENADO) ============ -->
+                <div class="an-grid" id="prediccion" th:attr="data-url=@{/admin/analitica/prediccion}">
+                    <div class="an-card full">
+                        <h2><i class="fas fa-brain"></i> Predicción de demanda por producto</h2>
+                        <div class="sub" id="pd-sub">Unidades que se estima vender de cada producto en la semana en curso,
+                            calculadas con el modelo predictivo y los pedidos pagados registrados en las últimas ocho semanas completas.
+                            Es un apoyo: no compra ni modifica el inventario.</div>
+                        <div id="pd-estado" class="an-empty">Calculando predicción...</div>
+                        <div id="pd-diagnostico" style="display:none;"></div>
+                        <div id="pd-contenido" style="display:none;">
+                            <div id="pd-avisos"></div>
+                            <div id="pd-mayor-demanda" class="pd-leader"></div>
+                            <div class="pd-kpis" id="pd-kpis"></div>
+                            <div class="an-chart"><canvas id="ch-prediccion"></canvas></div>
+                            <div style="overflow-x:auto; margin-top:18px;">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr><th>Producto</th><th>Categoría</th><th>Demanda estimada</th>
+                                            <th>Vendidas esta semana</th><th>Stock actual</th><th>A reponer</th><th>Estado</th></tr>
+                                    </thead>
+                                    <tbody id="pd-tabla"></tbody>
+                                </table>
+                            </div>
+                            <div class="sub" id="pd-modelo" style="margin-top:12px;"></div>
+                        </div>
+                    </div>
+                </div>
+        </section>
+    </main>
+</div>
+
+<script>
+(function () {
+    var COLORES = ['#1565c0', '#2e7d32', '#e65100', '#7b1fa2', '#c62828', '#00838f', '#f9a825', '#546e7a'];
+    var COLOR_SEG = { 'VIP / Campeones': '#2e7d32', 'Regulares': '#1565c0', 'En riesgo / Dormidos': '#c62828' };
+    var COLOR_ABC = { A: '#2e7d32', B: '#f9a825', C: '#9e9e9e' };
+
+    const currencyFormatter = new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    });
+    function money(v) { return 'COP ' + currencyFormatter.format(Number(v)); }
+    function el(id) { return document.getElementById(id); }
+    function esc(t) { var d = document.createElement('div'); d.textContent = (t == null ? '' : t); return d.innerHTML; }
+
+    Chart.defaults.font.family = 'inherit';
+    Chart.defaults.plugins.legend.position = 'bottom';
+
+    function chart(id, config) {
+        config.options = config.options || {};
+        config.options.responsive = true;
+        config.options.maintainAspectRatio = false;
+        return new Chart(el(id), config);
+    }
+
+    function render(d) {
+        var k = d.kpis;
+
+        // ---- KPIs
+        var kpis = [
+            ['Ingresos (pagados)', money(k.ingresos)],
+            ['Ticket promedio', money(k.ticketPromedio)],
+            ['Pedidos pagados', k.pedidosPagados + ' / ' + k.pedidosTotales],
+            ['Tasa de conversión', k.tasaConversion + '%'],
+            ['Unidades vendidas', k.unidadesVendidas],
+            ['Clientes registrados', k.clientesActivos]
+        ];
+        el('kpis').innerHTML = kpis.map(function (x) {
+            return '<div class="an-kpi"><span>' + x[0] + '</span><strong>' + x[1] + '</strong></div>';
+        }).join('');
+
+        var topProductos = d.topProductos;
+        if (!topProductos.labels.length) {
+            el('tabla-top-productos').style.display = 'none';
+            el('top-productos-vacio').style.display = 'block';
+        } else {
+            el('cuerpo-top-productos').innerHTML = topProductos.labels.map(function (nombre, i) {
+                return '<tr><td>' + (i + 1) + '</td><td>' + esc(nombre) + '</td><td><strong>' +
+                    topProductos.unidades[i] + '</strong></td><td>' + money(topProductos.ingresos[i]) + '</td></tr>';
+            }).join('');
+        }
+
+        // ---- Hallazgos
+        if (d.hallazgos && d.hallazgos.length) {
+            el('hallazgos').innerHTML = d.hallazgos.map(function (h) { return '<li>' + h + '</li>'; }).join('');
+            el('hallazgos-box').style.display = 'block';
+        }
+
+        // ---- Ventas + regresión
+        var vm = d.ventasMensuales;
+        var labels = vm.labels.slice();
+        var datasets = [{ type: 'bar', label: 'Ingresos', data: vm.ingresos, backgroundColor: '#90caf9', borderColor: '#1565c0', borderWidth: 1 }];
+        if (vm.regresion) {
+            var r = vm.regresion, n = vm.labels.length;
+            labels = labels.concat(r.labelsFuturos);
+            var relleno = [];
+            for (var i = 0; i < n - 1; i++) relleno.push(null);
+            datasets.push({ type: 'line', label: 'Tendencia (regresión lineal)', data: r.tendencia, borderColor: '#e65100', backgroundColor: '#e65100', tension: 0, pointRadius: 2 });
+            datasets.push({ type: 'line', label: 'Pronóstico 3 meses', data: relleno.concat([r.tendencia[n - 1]]).concat(r.pronostico), borderColor: '#7b1fa2', backgroundColor: '#7b1fa2', borderDash: [6, 6], pointRadius: 4 });
+            el('sub-regresion').textContent = 'y = COP $ ' + r.pendiente.toLocaleString('es-CO') + '·x + COP $ ' + r.intercepto.toLocaleString('es-CO') +
+                '   |   R² = ' + r.r2 + '   (x = número de mes). Mientras más cerca de 1 sea R², mejor explica la recta el comportamiento.' +
+                (r.mesParcialExcluido ? ' El mes en curso (incompleto) no se usó para ajustar la recta.' : '');
+        } else {
+            el('sub-regresion').textContent = 'Se necesitan al menos 3 meses completos de ventas pagadas para calcular la regresión.';
+        }
+        chart('ch-ventas', { data: { labels: labels, datasets: datasets },
+            options: { scales: { y: { beginAtZero: true, ticks: { callback: function (v) { return money(v); } } } } } });
+
+        // ---- Estados
+        var colEstado = { 'PAGADO': '#2e7d32', 'PENDIENTE': '#e65100', 'RECHAZADO': '#b71c1c' };
+        chart('ch-estados', { type: 'doughnut', data: { labels: d.estados.labels,
+            datasets: [{ data: d.estados.valores, backgroundColor: d.estados.labels.map(function (l, i) { return colEstado[l] || COLORES[i % COLORES.length]; }) }] } });
+
+        // ---- Día de la semana
+        chart('ch-dias', { type: 'bar', data: { labels: d.diaSemana.labels,
+            datasets: [{ label: 'Pedidos', data: d.diaSemana.valores, backgroundColor: '#7e57c2' }] },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } } });
+
+        // ---- Categorías
+        chart('ch-categorias', { type: 'pie', data: { labels: d.categorias.labels,
+            datasets: [{ data: d.categorias.valores, backgroundColor: COLORES }] },
+            options: { plugins: { tooltip: { callbacks: { label: function (c) { return c.label + ': ' + money(c.parsed); } } } } } });
+
+        // ---- Margen
+        chart('ch-margen', { type: 'bar', data: { labels: d.margenCategoria.labels,
+            datasets: [{ label: 'Margen %', data: d.margenCategoria.valores, backgroundColor: '#26a69a' }] },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } } });
+
+        // ---- Pareto
+        var p = d.pareto;
+        el('sub-pareto').textContent = 'Clase A: ' + p.resumen.A + ' producto(s) · Clase B: ' + p.resumen.B +
+            ' · Clase C: ' + p.resumen.C + '.  A = acumulan el 80% de los ingresos, B = hasta el 95%, C = el resto.';
+        chart('ch-pareto', { data: { labels: p.labels, datasets: [
+            { type: 'bar', label: 'Ingresos', data: p.valores, backgroundColor: p.clase.map(function (c) { return COLOR_ABC[c]; }), yAxisID: 'y' },
+            { type: 'line', label: '% acumulado', data: p.acumulado, borderColor: '#1565c0', backgroundColor: '#1565c0', yAxisID: 'y1', pointRadius: 3 }
+        ] }, options: { scales: {
+            y: { beginAtZero: true, ticks: { callback: function (v) { return money(v); } } },
+            y1: { position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false }, ticks: { callback: function (v) { return v + '%'; } } }
+        } } });
+
+        // ---- Segmentación
+        var s = d.segmentacion;
+        if (!s.suficiente) {
+            el('seg-ok').style.display = 'none';
+            el('seg-vacio').style.display = 'block';
+            el('seg-vacio').textContent = s.mensaje;
+        } else {
+            var porSeg = {};
+            s.puntos.forEach(function (pt) {
+                (porSeg[pt.segmento] = porSeg[pt.segmento] || []).push({
+                    x: pt.recencia, y: pt.monto, r: Math.min(5 + pt.frecuencia * 2.5, 26),
+                    cliente: pt.cliente, frecuencia: pt.frecuencia
+                });
+            });
+            chart('ch-segmentos', { type: 'bubble',
+                data: { datasets: Object.keys(porSeg).map(function (nombre) {
+                    return { label: nombre, data: porSeg[nombre], backgroundColor: (COLOR_SEG[nombre] || '#999') + 'b3', borderColor: COLOR_SEG[nombre] || '#999' };
+                }) },
+                options: {
+                    scales: { x: { title: { display: true, text: 'Recencia (días desde la última compra)' } },
+                              y: { title: { display: true, text: 'Monto total gastado' }, beginAtZero: true,
+                                   ticks: { callback: function (v) { return money(v); } } } },
+                    plugins: { tooltip: { callbacks: { label: function (c) {
+                        var o = c.raw;
+                        return o.cliente + ' — ' + o.x + ' días, ' + o.frecuencia + ' compra(s), ' + money(o.y);
+                    } } } }
+                } });
+            el('tabla-segmentos').innerHTML = s.resumen.map(function (r) {
+                return '<tr><td><span class="tag" style="background:' + (COLOR_SEG[r.segmento] || '#999') + '">' + r.segmento + '</span></td>' +
+                    '<td>' + r.clientes + '</td><td>' + r.recenciaProm + '</td><td>' + r.frecuenciaProm +
+                    '</td><td>' + money(r.montoProm) + '</td><td>' + money(r.montoTotal) + '</td></tr>';
+            }).join('');
+
+            chart('ch-codo', { type: 'line', data: { labels: s.codo.map(function (v, i) { return 'k=' + (i + 1); }),
+                datasets: [{ label: 'Inercia', data: s.codo, borderColor: '#c62828', backgroundColor: '#c62828', tension: 0.2, pointRadius: 5 }] },
+                options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+        }
+
+        // ---- Reglas de asociación
+        var a = d.asociacion;
+        el('sub-reglas').textContent = a.transacciones + ' pedido(s) pagados analizados, ' + a.transaccionesMultiples +
+            ' con 2 o más productos. Lift > 1 indica que los productos se compran juntos más de lo esperado por azar.';
+        if (!a.reglas.length) {
+            el('tabla-reglas').style.display = 'none';
+            el('reglas-vacio').style.display = 'block';
+        } else {
+            el('cuerpo-reglas').innerHTML = a.reglas.map(function (r) {
+                return '<tr><td>' + r.si + '</td><td>' + r.entonces + '</td><td>' + r.soporte + '%</td><td>' +
+                    r.confianza + '%</td><td><strong>' + r.lift + '</strong></td></tr>';
+            }).join('');
+        }
+    }
+
+    fetch(el('analitica').dataset.url, { credentials: 'same-origin' })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function (d) {
+            if (!d.kpis || d.kpis.pedidosTotales === 0) {
+                el('estado').textContent = 'Todavía no hay pedidos registrados. Genera datos de demostración (ver README_ANALITICA) o realiza compras.';
+                return;
+            }
+            el('estado').style.display = 'none';
+            el('contenido').style.display = 'block';
+            render(d);
+        })
+        .catch(function (e) { el('estado').textContent = 'No se pudieron cargar los datos: ' + e.message; });
+})();
+</script>
+
+<script>
+(function () {
+    function el(id) { return document.getElementById(id); }
+    function esc(t) { var d = document.createElement('div'); d.textContent = (t == null ? '' : t); return d.innerHTML; }
+    var COLOR = { AGOTADO: '#c62828', POCO_STOCK: '#f9a825', OK: '#2e7d32' };
+    var raiz = el('prediccion');
+    if (!raiz) return;
+
+    fetch(raiz.dataset.url, { credentials: 'same-origin' })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function (d) {
+            if (!d.disponible) {
+                el('pd-estado').textContent = d.mensaje;
+                if (d.diagnostico) {
+                    var g = d.diagnostico, est = Object.keys(g.pedidosPorEstado || {}).map(function (k) {
+                        return esc(k) + ': ' + g.pedidosPorEstado[k]; }).join(' · ') || 'ninguno';
+                    el('pd-diagnostico').style.display = 'block';
+                    el('pd-diagnostico').innerHTML = '<div class="pd-aviso azul" style="background:#eef5ff;border-color:#1565c0;"><b>Diagnóstico:</b> ' +
+                        g.pedidosTotales + ' pedidos en total (' + est + ') · ' + g.pedidosPagados + ' pagados · ' +
+                        g.lineasDeProductosReconocidas + ' líneas de productos reconocidas del catálogo · última venta pagada: ' +
+                        esc(g.ultimaVentaPagada || 'ninguna') + ' · productos en el catálogo: ' + g.productosEnCatalogo + '</div>';
+                }
+                return;
+            }
+            el('pd-estado').style.display = 'none';
+            el('pd-contenido').style.display = 'block';
+
+            var m = d.modelo, r = d.resumen;
+            el('pd-sub').textContent = 'Semana del ' + d.semanaInicio + ' al ' + d.semanaFin +
+                '. Unidades estimadas por producto con ' + m.algoritmo + ' usando las últimas ocho semanas completas de pedidos pagados registrados' +
+                '. Es un apoyo: no compra ni modifica el inventario.';
+
+            el('pd-avisos').innerHTML = (d.advertencias || []).map(function (a) {
+                return '<div class="pd-aviso"><i class="fas fa-exclamation-triangle"></i> ' + esc(a) + '</div>';
+            }).join('');
+
+            var predicciones = d.predicciones || [];
+            var mayorDemanda = predicciones.reduce(function (mayor, p) {
+                return Math.max(mayor, Number(p.demandaEstimada) || 0);
+            }, 0);
+            var productosMayorDemanda = predicciones.filter(function (p) {
+                return Number(p.demandaEstimada) === mayorDemanda && mayorDemanda > 0;
+            });
+            el('pd-mayor-demanda').innerHTML = mayorDemanda > 0
+                ? '<strong>Mayor demanda estimada esta semana:</strong> ' +
+                    productosMayorDemanda.map(function (p) { return esc(p.producto); }).join(', ') +
+                    ' — <strong>' + mayorDemanda.toLocaleString('es-CO') + ' unidades</strong>'
+                : 'No se estima demanda para los productos del catálogo esta semana.';
+
+            el('pd-kpis').innerHTML =
+                '<div><span>Demanda total estimada</span><strong>' + r.demandaTotal + ' u.</strong></div>' +
+                '<div><span>Productos a reponer</span><strong style="color:' + (r.productosAReponer ? '#c62828' : '#2e7d32') + '">' + r.productosAReponer + '</strong></div>' +
+                '<div><span>Productos con stock bajo</span><strong style="color:' + (r.productosConStockBajo ? '#e65100' : '#2e7d32') + '">' + r.productosConStockBajo + '</strong></div>' +
+                '<div><span>Productos analizados</span><strong>' + r.productos + '</strong></div>';
+
+            var g = d.grafica;
+            var labels = g.labels.concat([g.labelPrediccion + ' (estimada)']);
+            var datos = g.reales.concat([g.prediccion]);
+            var colores = g.reales.map(function () { return '#1565c0'; }).concat(['#c2185b']);
+            new Chart(el('ch-prediccion'), {
+                type: 'bar',
+                data: { labels: labels, datasets: [{ label: 'Unidades por semana (toda la tienda)', data: datos, backgroundColor: colores }] },
+                options: { responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, title: { display: true, text: 'Unidades vendidas por semana (azul) y estimación de la semana en curso (rosa)' } },
+                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Unidades' } } } }
+            });
+
+            el('pd-tabla').innerHTML = predicciones.map(function (p) {
+                return '<tr><td>' + esc(p.producto) + '</td><td>' + esc(p.categoria) + '</td>' +
+                    '<td><strong>' + p.demandaEstimada + '</strong></td><td>' + p.vendidasSemanaActual + '</td>' +
+                    '<td>' + p.stock + '</td><td>' + (p.reponer > 0 ? '<strong>' + p.reponer + '</strong>' : '—') + '</td>' +
+                    '<td><span class="tag" style="background:' + COLOR[p.estado] + '">' + esc(p.estado) + '</span> ' +
+                    '<small>' + esc(p.mensaje) + '</small></td></tr>';
+            }).join('');
+
+            el('pd-modelo').textContent = 'Modelo: ' + m.algoritmo +
+                '. La estimación usa los pedidos pagados de las últimas ocho semanas completas guardados en la base de datos.';
+        })
+        .catch(function (e) { el('pd-estado').textContent = 'No se pudo calcular la predicción: ' + e.message; });
+})();
+</script>
+
+</body>
+</html>

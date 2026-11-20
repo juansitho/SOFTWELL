@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon-32.ico}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restablecer contraseña - SOFTWELL</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+</head>
+<body>
+<main style="max-width: 520px; margin: 8vh auto; padding: 32px; background: #fff; border-radius: 12px;">
+    <h1>Define una nueva contraseña</h1>
+    <p>Usa el correo al que enviamos el código. El código vence en 10 minutos.</p>
+
+    <div th:if="${success}" class="alert alert-success" role="status" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" role="alert" th:text="${error}"></div>
+
+    <form th:action="@{/restablecer-contrasena}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <label for="email">Correo electrónico</label>
+        <input id="email" name="email" type="email" autocomplete="email" required
+               style="display: block; box-sizing: border-box; width: 100%; margin: 8px 0 16px; padding: 12px;">
+
+        <label for="codigo">Código de 6 dígitos</label>
+        <input id="codigo" name="codigo" type="text" inputmode="numeric" pattern="[0-9]{6}"
+               maxlength="6" autocomplete="one-time-code" required
+               style="display: block; box-sizing: border-box; width: 100%; margin: 8px 0 16px; padding: 12px;">
+
+        <label for="password">Nueva contraseña (mínimo 8 caracteres)</label>
+        <input id="password" name="password" type="password" minlength="8"
+               autocomplete="new-password" required
+               style="display: block; box-sizing: border-box; width: 100%; margin: 8px 0 16px; padding: 12px;">
+
+        <label for="confirmarPassword">Confirmar contraseña</label>
+        <input id="confirmarPassword" name="confirmarPassword" type="password" minlength="8"
+               autocomplete="new-password" required
+               style="display: block; box-sizing: border-box; width: 100%; margin: 8px 0 16px; padding: 12px;">
+
+        <button type="submit" class="btn btn-primary">Guardar contraseña nueva</button>
+    </form>
+
+    <p><a th:href="@{/recuperar-contrasena}">Solicitar otro código</a></p>
+    <a th:href="@{/login}">Volver al inicio de sesión</a>
+</main>
+</body>
+</html>

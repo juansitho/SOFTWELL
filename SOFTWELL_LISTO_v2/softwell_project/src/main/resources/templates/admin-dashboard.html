@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon-32.ico}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Administración LJE</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .lje-admin-dashboard {
+            --bg-general: #F4F2F7;
+            --surface-white: #FFFFFF;
+            --field-bg: #FAF9FC;
+            --text-main: #1F1528;
+            --text-muted: #6A5F76;
+            --border-subtle: #E5E0EC;
+            --turquoise: #00B4B6;
+            --turquoise-light: #55D6C8;
+            --turquoise-dark: #008F91;
+            --turquoise-soft: #D9F4F1;
+            --turquoise-border: #B8E8E3;
+            --green-accepted-bg: #D9F2E3;
+            --green-accepted-text: #12633A;
+            --red-rejected-bg: #FBDDE1;
+            --red-rejected-text: #8C1D2C;
+            min-height: 100vh;
+            color: var(--text-main);
+            background: var(--bg-general);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .lje-admin-dashboard,
+        .lje-admin-dashboard * { box-sizing: border-box; }
+
+        .lje-admin-dashboard .admin-container { min-height: 100vh; }
+
+        .lje-admin-dashboard .sidebar {
+            width: 252px;
+            padding: 24px 16px 18px;
+            color: var(--surface-white);
+            background: linear-gradient(165deg, var(--turquoise) 0%, var(--turquoise-dark) 76%);
+            box-shadow: 8px 0 30px rgba(0, 143, 145, .12);
+            border: 0;
+        }
+
+        .lje-admin-dashboard .sidebar-header {
+            padding: 10px 10px 26px;
+            border-bottom: 1px solid rgba(255,255,255,.2);
+        }
+
+        .lje-admin-dashboard .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--surface-white);
+            text-decoration: none;
+        }
+
+        .lje-admin-dashboard .brand-mark {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255,255,255,.35);
+            border-radius: 14px;
+            color: var(--text-main);
+            background: rgba(255,255,255,.9);
+            box-shadow: 0 5px 15px rgba(31,21,40,.12);
+        }
+
+        .lje-admin-dashboard .brand-name {
+            display: block;
+            color: var(--surface-white);
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            line-height: 1;
+        }
+
+        .lje-admin-dashboard .brand-caption {
+            display: block;
+            margin-top: 5px;
+            color: rgba(255,255,255,.78);
+            font-size: 9px;
+            letter-spacing: .13em;
+        }
+
+        .lje-admin-dashboard .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .lje-admin-dashboard .sidebar-label {
+            margin: 0 10px 10px;
+            color: rgba(255,255,255,.66);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+        }
+
+        .lje-admin-dashboard .nav-item,
+        .lje-admin-dashboard .nav-item.active {
+            min-height: 44px;
+            margin: 4px 0;
+            padding: 0 12px;
+            border: 1px solid transparent;
+            border-left: 1px solid transparent;
+            border-radius: 12px;
+            color: rgba(255,255,255,.84);
+            background: transparent;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background .2s ease, transform .2s ease, border-color .2s ease;
+        }
+
+        .lje-admin-dashboard .nav-item i {
+            width: 19px;
+            margin-right: 10px;
+            color: rgba(255,255,255,.78);
+            text-align: center;
+        }
+
+        .lje-admin-dashboard .nav-item:hover,
+        .lje-admin-dashboard .nav-item.active {
+            color: var(--surface-white);
+            background: rgba(255,255,255,.15);
+            border-color: rgba(255,255,255,.18);
+        }
+
+        .lje-admin-dashboard .nav-item:hover { transform: translateX(2px); }
+        .lje-admin-dashboard .nav-item.active i { color: var(--accent); }
+
+        .lje-admin-dashboard .sidebar-footer {
+            padding: 14px 0 0;
+            border-top: 1px solid rgba(255,255,255,.2);
+        }
+
+        .lje-admin-dashboard .logout-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 12px;
+            border: 0;
+            border-radius: 11px;
+            color: rgba(255,255,255,.86);
+            background: transparent;
+            font: 600 12px 'Plus Jakarta Sans', sans-serif;
+            text-align: left;
+            cursor: pointer;
+            transition: background .2s ease;
+        }
+
+        .lje-admin-dashboard .logout-btn:hover {
+            color: var(--surface-white);
+            background: rgba(255,255,255,.12);
+        }
+
+        .lje-admin-dashboard .main-content {
+            height: 100vh;
+            margin-left: 252px;
+            overflow-y: auto;
+            color: var(--text-main);
+            background: var(--bg-general);
+        }
+
+        .lje-admin-dashboard .admin-header {
+            min-height: 74px;
+            padding: 15px clamp(22px, 3vw, 42px);
+            border-bottom: 1px solid var(--border-subtle);
+            background: rgba(255,255,255,.92);
+            box-shadow: 0 3px 14px rgba(31,21,40,.025);
+        }
+
+        .lje-admin-dashboard .header-title {
+            margin: 0;
+            color: var(--text-main);
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            line-height: 1;
+        }
+
+        .lje-admin-dashboard .header-context {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .lje-admin-dashboard .header-context i { color: var(--turquoise-dark); }
+
+        .lje-admin-dashboard .content-section.active {
+            display: block;
+            padding: 24px clamp(18px, 3vw, 42px) 40px;
+        }
+
+        .lje-admin-dashboard .welcome-banner {
+            position: relative;
+            overflow: hidden;
+            min-height: 170px;
+            margin-bottom: 22px;
+            padding: clamp(24px, 3vw, 34px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            border: 1px solid rgba(255,255,255,.24);
+            border-radius: 22px;
+            color: var(--surface-white);
+            background: linear-gradient(112deg, var(--turquoise-light) 0%, var(--turquoise) 48%, var(--turquoise-dark) 100%);
+            box-shadow: 0 14px 32px rgba(0,143,145,.18);
+            isolation: isolate;
+        }
+
+        .lje-admin-dashboard .welcome-banner::before,
+        .lje-admin-dashboard .welcome-banner::after {
+            position: absolute;
+            z-index: -1;
+            content: "";
+            border: 1px solid rgba(255,255,255,.18);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .lje-admin-dashboard .welcome-banner::before {
+            width: 250px;
+            height: 250px;
+            top: -150px;
+            right: 6%;
+            box-shadow: 0 0 0 24px rgba(255,255,255,.035), 0 0 0 52px rgba(255,255,255,.025);
+        }
+
+        .lje-admin-dashboard .welcome-banner::after {
+            width: 130px;
+            height: 130px;
+            right: 21%;
+            bottom: -96px;
+        }
+
+        .lje-admin-dashboard .welcome-copy { max-width: 650px; }
+
+        .lje-admin-dashboard .welcome-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            color: rgba(255,255,255,.86);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+        }
+
+        .lje-admin-dashboard .welcome-eyebrow i { color: var(--accent); }
+
+        .lje-admin-dashboard .welcome-title {
+            margin: 0;
+            color: var(--surface-white);
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(32px, 4vw, 43px);
+            font-weight: 700;
+            line-height: .98;
+        }
+
+        .lje-admin-dashboard .welcome-description {
+            margin: 10px 0 0;
+            color: rgba(255,255,255,.84);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .lje-admin-dashboard .welcome-mark {
+            width: 88px;
+            height: 88px;
+            flex: 0 0 auto;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255,255,255,.32);
+            border-radius: 28px;
+            color: var(--accent);
+            background: rgba(255,255,255,.12);
+            font-size: 34px;
+            transform: rotate(7deg);
+        }
+
+        .lje-admin-dashboard .section-heading {
+            margin: 0 0 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 12px;
+        }
+
+        .lje-admin-dashboard .section-heading h2 {
+            margin: 0;
+            color: var(--text-main);
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .lje-admin-dashboard .section-heading p {
+            margin: 5px 0 0;
+            color: var(--text-muted);
+            font-size: 10px;
+        }
+
+        .lje-admin-dashboard .dashboard-stats {
+            width: 100%;
+            margin: 0 0 23px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 13px;
+        }
+
+        .lje-admin-dashboard .stat-card {
+            position: relative;
+            overflow: hidden;
+            min-width: 0;
+            min-height: 128px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            background: var(--surface-white);
+            box-shadow: 0 5px 16px rgba(31,21,40,.035);
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+
+        .lje-admin-dashboard .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(31,21,40,.08);
+        }
+
+        .lje-admin-dashboard .stat-card::before {
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 3px;
+            content: "";
+            background: var(--turquoise);
+        }
+
+        .lje-admin-dashboard .stat-card:nth-child(2)::before { background: var(--turquoise-light); }
+        .lje-admin-dashboard .stat-card:nth-child(3)::before { background: var(--turquoise-dark); }
+
+        .lje-admin-dashboard .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lje-admin-dashboard .stat-title {
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .lje-admin-dashboard .stat-icon {
+            width: 32px;
+            height: 32px;
+            flex: 0 0 auto;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--turquoise-border);
+            border-radius: 10px;
+            color: var(--turquoise-dark);
+            background: var(--turquoise-soft);
+            font-size: 12px;
+        }
+
+        .lje-admin-dashboard .stat-value {
+            margin-top: 11px;
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 30px;
+            font-weight: 700;
+            line-height: .95;
+        }
+
+        .lje-admin-dashboard .stat-foot {
+            margin-top: 6px;
+            color: var(--text-muted);
+            font-size: 9px;
+        }
+
+        .lje-admin-dashboard .dashboard-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(260px, .8fr);
+            gap: 15px;
+            align-items: start;
+        }
+
+        .lje-admin-dashboard .dashboard-panel {
+            min-width: 0;
+            padding: 19px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 17px;
+            background: var(--surface-white);
+            box-shadow: 0 5px 16px rgba(31,21,40,.035);
+        }
+
+        .lje-admin-dashboard .panel-link {
+            color: var(--turquoise-dark);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .lje-admin-dashboard .panel-link:hover { color: var(--turquoise); }
+
+        .lje-admin-dashboard .summary-panel { margin-bottom: 15px; }
+
+        .lje-admin-dashboard .summary-numbers {
+            margin-top: 17px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .lje-admin-dashboard .summary-item {
+            padding: 13px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 13px;
+            background: var(--field-bg);
+        }
+
+        .lje-admin-dashboard .summary-item span {
+            display: block;
+            color: var(--text-muted);
+            font-size: 9px;
+        }
+
+        .lje-admin-dashboard .summary-item strong {
+            display: block;
+            margin-top: 6px;
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 25px;
+            line-height: 1;
+        }
+
+        .lje-admin-dashboard .stock-progress {
+            width: 100%;
+            height: 9px;
+            margin: 15px 0 6px;
+            overflow: hidden;
+            border: 0;
+            border-radius: 20px;
+            appearance: none;
+            background: var(--turquoise-soft);
+        }
+
+        .lje-admin-dashboard .stock-progress::-webkit-progress-bar {
+            border-radius: 20px;
+            background: var(--turquoise-soft);
+        }
+
+        .lje-admin-dashboard .stock-progress::-webkit-progress-value {
+            border-radius: 20px;
+            background: linear-gradient(90deg, var(--turquoise-light), var(--turquoise-dark));
+        }
+
+        .lje-admin-dashboard .stock-progress::-moz-progress-bar {
+            border-radius: 20px;
+            background: linear-gradient(90deg, var(--turquoise-light), var(--turquoise-dark));
+        }
+
+        .lje-admin-dashboard .progress-caption {
+            color: var(--text-muted);
+            font-size: 9px;
+        }
+
+        .lje-admin-dashboard .alerts-list {
+            max-height: 240px;
+            overflow: auto;
+            display: grid;
+            gap: 8px;
+        }
+
+        .lje-admin-dashboard .alert-row {
+            padding: 10px 11px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid var(--border-subtle);
+            border-left: 3px solid var(--accent);
+            border-radius: 11px;
+            color: var(--text-main);
+            background: var(--field-bg);
+            font-size: 10px;
+        }
+
+        .lje-admin-dashboard .alert-row.is-danger {
+            border-left-color: var(--red-rejected-text);
+            background: var(--red-rejected-bg);
+        }
+
+        .lje-admin-dashboard .alert-row.is-warning {
+            border-left-color: var(--accent);
+            background: rgba(184,134,11,.08);
+        }
+
+        .lje-admin-dashboard .alert-copy { display: flex; align-items: center; gap: 8px; }
+        .lje-admin-dashboard .alert-row i { color: var(--accent-600); }
+        .lje-admin-dashboard .alert-row.is-danger i { color: var(--red-rejected-text); }
+
+        .lje-admin-dashboard .alert-link {
+            color: var(--turquoise-dark);
+            text-decoration: none;
+            font-size: 9px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .lje-admin-dashboard .alert-link:hover { color: var(--turquoise); }
+        .lje-admin-dashboard .empty-alerts { padding: 18px 10px; color: var(--text-muted); font-size: 10px; text-align: center; }
+        .lje-admin-dashboard .empty-alerts i { display: block; margin-bottom: 7px; color: var(--turquoise-dark); font-size: 18px; }
+
+        .lje-admin-dashboard .featured-panel { margin-top: 15px; }
+        .lje-admin-dashboard .featured-panel .section-heading h2 { font-size: 28px; }
+        .lje-admin-dashboard .featured-panel .section-heading p { font-size: 13px; }
+        .lje-admin-dashboard .featured-panel .panel-link { font-size: 12px; }
+        .lje-admin-dashboard .table-wrap { overflow-x: auto; }
+        .lje-admin-dashboard .featured-panel .admin-table th {
+            padding: 15px 13px;
+            font-size: 13px;
+        }
+
+        .lje-admin-dashboard .featured-panel .admin-table td {
+            padding: 15px 13px;
+            font-size: 17px;
+        }
+
+        .lje-admin-dashboard .admin-table {
+            width: 100%;
+            border: 0;
+            border-collapse: collapse;
+            border-radius: 0;
+            box-shadow: none;
+            background: var(--surface-white);
+            text-align: left;
+        }
+
+        .lje-admin-dashboard .admin-table th {
+            padding: 11px 9px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-subtle);
+            background: var(--field-bg);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .lje-admin-dashboard .admin-table td {
+            padding: 10px 9px;
+            color: var(--text-main);
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 10px;
+            vertical-align: middle;
+        }
+
+        .lje-admin-dashboard .admin-table tbody tr:hover { background: var(--field-bg); }
+        .lje-admin-dashboard .admin-table tbody tr:last-child td { border-bottom: 0; }
+
+        .lje-admin-dashboard .featured-image {
+            width: 100px;
+            height: 100px;
+            display: block;
+            object-fit: cover;
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            background: var(--field-bg);
+        }
+
+        .lje-admin-dashboard .edit-link {
+            width: 29px;
+            height: 29px;
+            display: inline-grid;
+            place-items: center;
+            border: 1px solid var(--border-subtle);
+            border-radius: 9px;
+            color: var(--turquoise-dark);
+            text-decoration: none;
+            background: var(--surface-white);
+        }
+
+        .lje-admin-dashboard .edit-link:hover {
+            border-color: var(--turquoise-border);
+            background: var(--turquoise-soft);
+        }
+
+        .lje-admin-dashboard .empty-featured {
+            padding: 20px;
+            border: 1px dashed var(--border-subtle);
+            border-radius: 12px;
+            color: var(--text-muted);
+            background: var(--field-bg);
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .lje-admin-dashboard .empty-featured i { margin-right: 7px; color: var(--turquoise-dark); }
+
+        @media (max-width: 1120px) {
+            .lje-admin-dashboard .dashboard-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .lje-admin-dashboard .dashboard-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 760px) {
+            .lje-admin-dashboard .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                min-height: 0;
+                padding: 12px;
+            }
+
+            .lje-admin-dashboard .sidebar-header { padding: 3px 7px 10px; }
+            .lje-admin-dashboard .brand-mark { width: 36px; height: 36px; }
+            .lje-admin-dashboard .brand-name { font-size: 20px; }
+            .lje-admin-dashboard .brand-caption { font-size: 8px; }
+            .lje-admin-dashboard .sidebar-label,
+            .lje-admin-dashboard .sidebar-footer { display: none; }
+            .lje-admin-dashboard .sidebar-nav { padding: 9px 0 0; overflow-x: auto; }
+            .lje-admin-dashboard .sidebar-nav-inner { min-width: max-content; display: flex; gap: 4px; }
+            .lje-admin-dashboard .nav-item,
+            .lje-admin-dashboard .nav-item.active { min-height: 37px; margin: 0; padding: 0 10px; font-size: 10px; }
+            .lje-admin-dashboard .nav-item i { width: auto; margin-right: 6px; }
+            .lje-admin-dashboard .main-content { height: auto; min-height: calc(100vh - 100px); margin-left: 0; overflow: visible; }
+            .lje-admin-dashboard .admin-header { min-height: 60px; padding: 12px 17px; }
+            .lje-admin-dashboard .content-section.active { padding: 18px 15px 28px; }
+            .lje-admin-dashboard .dashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+            .lje-admin-dashboard .stat-card { min-height: 115px; padding: 13px; }
+            .lje-admin-dashboard .welcome-mark { width: 62px; height: 62px; border-radius: 20px; font-size: 25px; }
+        }
+
+        @media (max-width: 460px) {
+            .lje-admin-dashboard .welcome-banner { min-height: 0; align-items: flex-start; }
+            .lje-admin-dashboard .welcome-mark { display: none; }
+            .lje-admin-dashboard .dashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .lje-admin-dashboard .stat-title { font-size: 9px; }
+            .lje-admin-dashboard .stat-value { font-size: 26px; }
+            .lje-admin-dashboard .dashboard-panel { padding: 14px; }
+            .lje-admin-dashboard .summary-numbers { gap: 8px; }
+            .lje-admin-dashboard .section-heading h2 { font-size: 21px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .lje-admin-dashboard *,
+            .lje-admin-dashboard *::before,
+            .lje-admin-dashboard *::after {
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+    </style>
+</head>
+<body class="lje-admin-dashboard admin-app">
+<div class="admin-container">
+    <aside th:replace="~{fragments/admin-sidebar :: sidebar}"></aside>
+
+    <main class="main-content admin-main-content">
+        <header class="admin-header">
+            <h1 class="header-title">Dashboard</h1>
+            <div class="header-context"><i class="fas fa-shield-halved"></i> Panel de administración</div>
+        </header>
+
+        <section class="content-section active">
+            <section class="welcome-banner" aria-labelledby="admin-welcome-title">
+                <div class="welcome-copy">
+                    <span class="welcome-eyebrow"><i class="fas fa-sparkles"></i> SOFTWELL</span>
+                    <h2 class="welcome-title" id="admin-welcome-title">Visión general</h2>
+                    <p class="welcome-description">Administra el catálogo, revisa las ofertas y mantén cada área de SOFTWELL en sintonía.</p>
+                </div>
+                <span class="welcome-mark" aria-hidden="true"><i class="fas fa-gem"></i></span>
+            </section>
+
+            <div class="section-heading">
+                <div>
+                    <h2>Resumen de actividad</h2>
+                    <p>Indicadores actuales de tu tienda.</p>
+                </div>
+            </div>
+
+            <div class="dashboard-stats">
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-title">Productos en tienda</span>
+                        <span class="stat-icon"><i class="fas fa-box-open"></i></span>
+                    </div>
+                    <strong class="stat-value" th:text="${totalProductos}">0</strong>
+                    <span class="stat-foot">Unidades en inventario</span>
+                </article>
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-title">Clientes</span>
+                        <span class="stat-icon"><i class="fas fa-users"></i></span>
+                    </div>
+                    <strong class="stat-value" th:text="${totalClientes}">0</strong>
+                    <span class="stat-foot">Cuentas registradas</span>
+                </article>
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <span class="stat-title">Pedidos</span>
+                        <span class="stat-icon"><i class="fas fa-receipt"></i></span>
+                    </div>
+                    <strong class="stat-value" th:text="${totalPedidos}">0</strong>
+                    <span class="stat-foot">Pedidos registrados</span>
+                </article>
+            </div>
+
+            <div class="dashboard-grid">
+                <section class="dashboard-panel summary-panel" aria-labelledby="inventory-title">
+                    <div class="section-heading">
+                        <div>
+                            <h2 id="inventory-title">Inventario y catálogo</h2>
+                            <p>Productos disponibles y selecciones destacadas.</p>
+                        </div>
+                        <a th:href="@{/admin/productos}" class="panel-link">Ver productos <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div class="summary-numbers">
+                        <div class="summary-item">
+                            <span>Unidades en tienda</span>
+                            <strong th:text="${totalProductos}">0</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span>Productos destacados</span>
+                            <strong th:text="${totalDestacados}">0</strong>
+                        </div>
+                    </div>
+                    <progress class="stock-progress" th:value="${totalDestacados}" th:max="${totalProductos > 0 ? totalProductos : 1}" aria-label="Proporción de productos destacados"></progress>
+                    <span class="progress-caption">Selección destacada dentro del inventario actual.</span>
+                </section>
+
+                <section class="dashboard-panel" aria-labelledby="alerts-title">
+                    <div class="section-heading">
+                        <div>
+                            <h2 id="alerts-title">Alertas</h2>
+                            <p>Requieren atención cuando aparecen.</p>
+                        </div>
+                        <span class="stat-icon"><i class="fas fa-bell"></i></span>
+                    </div>
+                    <div class="alerts-list">
+                        <div th:if="${totalOfertas > 0}" class="alert-row is-warning">
+                            <span class="alert-copy"><i class="fas fa-clock"></i><span><strong th:text="${totalOfertas}">0</strong> oferta(s) pendiente(s) de revisión.</span></span>
+                            <a th:href="@{/admin/ofertas}" class="alert-link">Revisar</a>
+                        </div>
+                        <div th:each="p : ${productosAgotados}" class="alert-row is-danger">
+                            <span class="alert-copy"><i class="fas fa-circle-exclamation"></i><span><strong th:text="${p.nombre}">Producto</strong> tiene stock agotado.</span></span>
+                            <a th:href="@{/admin/productos}" class="alert-link">Ver</a>
+                        </div>
+                        <div th:each="p : ${productosBajoStock}" class="alert-row is-warning">
+                            <span class="alert-copy"><i class="fas fa-triangle-exclamation"></i><span><strong th:text="${p.nombre}">Producto</strong>: <strong th:text="${p.stock}">0</strong> unidad(es).</span></span>
+                            <a th:href="@{/admin/productos}" class="alert-link">Ver</a>
+                        </div>
+                        <div th:if="${totalOfertas == 0 and productosAgotados.isEmpty() and productosBajoStock.isEmpty()}" class="empty-alerts">
+                            <i class="fas fa-circle-check"></i>
+                            Todo está al día. No hay alertas pendientes.
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <section class="dashboard-panel featured-panel" aria-labelledby="featured-title">
+                <div class="section-heading">
+                    <div>
+                        <h2 id="featured-title"><i class="fas fa-star" style="color: var(--accent);"></i> Productos destacados</h2>
+                        <p>Vista rápida de las piezas seleccionadas para la tienda.</p>
+                    </div>
+                    <a th:href="@{/admin/productos}" class="panel-link">Administrar catálogo <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div th:if="${#lists.isEmpty(productosDestacados)}" class="empty-featured">
+                    <i class="far fa-gem"></i>No hay productos marcados como destacados actualmente.
+                </div>
+
+                <div th:unless="${#lists.isEmpty(productosDestacados)}" class="table-wrap">
+                    <table class="admin-table">
+                        <thead>
+                        <tr>
+                            <th>Imagen</th>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Acción</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="producto : ${productosDestacados}">
+                            <td>
+                                <img class="featured-image"
+                                     th:src="${producto.imagen != null and !#strings.isEmpty(producto.imagen) ? producto.imagen : '/img/Anillo-Blanco.jpeg'}"
+                                     th:alt="${producto.nombre}">
+                            </td>
+                            <td th:text="${producto.nombre}">Nombre del producto</td>
+                            <td th:text="'COP $ ' + ${#numbers.formatDecimal(producto.precio, 1, 'POINT', 0, 'COMMA')}">COP $ 0</td>
+                            <td th:text="${producto.stock}">0</td>
+                            <td>
+                                <a th:href="@{/admin/productos/editar/{id}(id=${producto.id})}" class="edit-link" aria-label="Editar producto">
+                                    <i class="fas fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+    </main>
+</div>
+</body>
+</html>
